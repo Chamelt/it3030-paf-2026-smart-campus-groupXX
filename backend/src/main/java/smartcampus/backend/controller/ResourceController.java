@@ -79,14 +79,19 @@ public class ResourceController {
     public ResponseEntity<ResourceResponse> updateResourceStatus(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
-        ResourceStatus newStatus = ResourceStatus.valueOf(body.get("status"));
-        return ResponseEntity.ok(resourceService.updateResourceStatus(id, newStatus));
-    }
+            
+        String statusStr = body.get("status");
+        if (statusStr == null || statusStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("The 'status' field is required in the request body.");
+        }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteResource(@PathVariable UUID id) {
-        resourceService.deleteResource(id);
-        return ResponseEntity.noContent().build();
+        ResourceStatus newStatus;
+        try {
+            newStatus = ResourceStatus.valueOf(statusStr.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status value. Must be: ACTIVE, OUT_OF_SERVICE, or DECOMMISSIONED");
+        }
+
+        return ResponseEntity.ok(resourceService.updateResourceStatus(id, newStatus));
     }
 }
