@@ -29,18 +29,25 @@ public class ResourceService {
     private final EntityManager entityManager;
 
     public List<ResourceResponse> getAllResources(
-            ResourceType type,
-            ResourceStatus status,
-            String floor,
-            Integer minCapacity,
-            String feature,
-            String search) {
-        return resourceRepository
-                .findAllWithFilters(type, status, floor, minCapacity, feature, search)
-                .stream()
-                .map(ResourceResponse::fromEntity)
-                .toList();
-    }
+        ResourceType type,
+        ResourceStatus status,
+        String floor,
+        Integer minCapacity,
+        String feature,
+        String search) {
+        
+    return resourceRepository
+            .findAllWithFilters(
+                    type != null ? type.name() : null,
+                    status != null ? status.name() : null,
+                    floor,
+                    minCapacity,
+                    feature,
+                    search)
+            .stream()
+            .map(ResourceResponse::fromEntity)
+            .toList();
+}
 
     public ResourceResponse getResourceById(UUID id) {
         Resource resource = resourceRepository.findById(id)

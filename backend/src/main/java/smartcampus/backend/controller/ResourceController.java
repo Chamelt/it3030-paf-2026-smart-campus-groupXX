@@ -94,4 +94,11 @@ public class ResourceController {
 
         return ResponseEntity.ok(resourceService.updateResourceStatus(id, newStatus));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteResource(@PathVariable UUID id) {
+        resourceService.deleteResource(id);
+        return ResponseEntity.noContent().build();
+    }
 }
