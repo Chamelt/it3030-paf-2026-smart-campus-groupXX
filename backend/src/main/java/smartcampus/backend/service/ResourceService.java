@@ -176,11 +176,17 @@ public class ResourceService {
     public void deleteResource(UUID id) {
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
-
+    
         if (resource.getStatus() == ResourceStatus.DECOMMISSIONED) {
             throw new IllegalArgumentException("Resource is already decommissioned");
         }
-
+    
+        // Clean up S3 image since this resource is permanently retired
+        if (resource.getImageUrl() != null) {
+            s3ImageService.deleteImage(resource.getImageUrl());
+            resource.setImageUrl(null);
+        }
+    
         resource.setStatus(ResourceStatus.DECOMMISSIONED);
         resource.setUpdatedAt(LocalDateTime.now());
         resourceRepository.save(resource);
