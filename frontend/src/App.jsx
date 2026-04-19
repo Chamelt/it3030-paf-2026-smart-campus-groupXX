@@ -9,6 +9,7 @@ import DashboardPage      from './pages/DashboardPage'
 import Layout             from './components/Layout'
 import UserManagementPage  from './pages/admin/UserManagementPage'
 import AdminDashboardPage  from './pages/admin/AdminDashboardPage'
+import ManageResourcesPage from './pages/admin/ManageResourcesPage'
 import NotFoundPage        from './pages/NotFoundPage'
 
 export default function App() {
@@ -31,7 +32,7 @@ export default function App() {
             {/* Protected — ADMIN only */}
             <Route path="/admin/users"     element={<ProtectedRoute role="ADMIN"><UserManagementPage /></ProtectedRoute>} />
             <Route path="/admin/bookings"  element={<ProtectedRoute role="ADMIN"><div style={{padding:40}}>Module B – All Bookings (Member 2)</div></ProtectedRoute>} />
-            <Route path="/admin/resources" element={<ProtectedRoute role="ADMIN"><div style={{padding:40}}>Module A – Manage Resources (Member 1)</div></ProtectedRoute>} />
+            <Route path="/admin/resources" element={<ProtectedRoute role="ADMIN"><ManageResourcesPage /></ProtectedRoute>} />
 
             {/* Placeholders — other modules will fill these in */}
             <Route path="/resources"         element={<div style={{padding:40}}>Module A – Resource Catalogue (Member 1)</div>} />

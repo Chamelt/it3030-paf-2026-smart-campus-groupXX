@@ -47,6 +47,11 @@ export default function Sidebar() {
                  👥 Manage Users
                </NavLink>
             )}
+            {isAdmin && (
+               <NavLink to="/admin/resources" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+                 🏢 Manage Resources
+               </NavLink>
+            )}
           </>
         )}
       </div>
