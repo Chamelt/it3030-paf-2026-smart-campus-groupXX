@@ -1,60 +1,73 @@
-// Feature branch: feature/E-auth-context-axios
-// Global authentication state for the React app.
-// Exposes: user, loading, loginWithToken (called after OAuth2 redirect),
-//          logout, isAdmin, isTechnician.
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import axiosInstance from '../api/axiosInstance'
+// src/context/AuthContext.jsx
+import React, { createContext, useContext, useState } from 'react'
 
 const AuthContext = createContext(null)
+const TOKEN_KEY = 'sc_jwt'
+
+function decodeToken(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        return {
+            id: payload.sub,
+            email: payload.email,
+            name: payload.name,
+            role: payload.role,
+        }
+    } catch {
+        return null
+    }
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null)
-  const [loading, setLoading] = useState(true)
+    const [currentUser, setCurrentUser] = useState(() => {
+        try {
+            const token = localStorage.getItem(TOKEN_KEY)
+            if (!token) return null
+            return decodeToken(token)
+        } catch {
+            return null
+        }
+    })
 
-  // On mount — if a token exists, fetch the current user profile
-  useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      setLoading(false)
-      return
+    const login = (token) => {
+        localStorage.setItem(TOKEN_KEY, token)
+        const user = decodeToken(token)
+        setCurrentUser(user)
+        return user
     }
-    axiosInstance.get('/api/users/me')
-      .then((res) => setUser(res.data))
-      .catch(() => {
-        localStorage.removeItem('token')
-        setUser(null)
-      })
-      .finally(() => setLoading(false))
-  }, [])
 
-  // Called by OAuth2RedirectPage after receiving the token from the URL
-  const loginWithToken = useCallback(async (token) => {
-    localStorage.setItem('token', token)
-    const res = await axiosInstance.get('/api/users/me')
-    setUser(res.data)
-  }, [])
-
-  const logout = useCallback(async () => {
-    try {
-      await axiosInstance.post('/api/auth/logout')
-    } finally {
-      localStorage.removeItem('token')
-      setUser(null)
+    // Alias used by Member 4's OAuth2RedirectPage
+    const loginWithToken = (token) => {
+        return Promise.resolve(login(token))
     }
-  }, [])
 
-  const isAdmin       = user?.role === 'ADMIN'
-  const isTechnician  = user?.role === 'TECHNICIAN'
+    const logout = () => {
+        localStorage.removeItem(TOKEN_KEY)
+        setCurrentUser(null)
+    }
 
-  return (
-    <AuthContext.Provider value={{ user, loading, loginWithToken, logout, isAdmin, isTechnician }}>
-      {children}
-    </AuthContext.Provider>
-  )
+    const getToken = () => localStorage.getItem(TOKEN_KEY)
+
+    return (
+        <AuthContext.Provider value={{
+            currentUser,
+            user: currentUser,      // ← alias for ProtectedRoute
+            loading: false,         // ← ProtectedRoute checks this
+            login,
+            loginWithToken,
+            logout,
+            getToken,
+            isAdmin: currentUser?.role === 'ADMIN',
+            isUser: currentUser?.role === 'USER',
+            isTechnician: currentUser?.role === 'TECHNICIAN',
+        }}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>')
-  return ctx
+    const ctx = useContext(AuthContext)
+    if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>')
+    return ctx
 }
