@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import smartcampus.backend.dto.AvailabilityResponse;
 import smartcampus.backend.dto.CreateResourceRequest;
 import smartcampus.backend.dto.ResourceResponse;
 import smartcampus.backend.dto.UpdateResourceRequest;
@@ -55,37 +54,6 @@ public class ResourceService {
         return ResourceResponse.fromEntity(resource);
     }
 
-    public AvailabilityResponse getResourceAvailability(UUID id, LocalDate date) {
-        Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
-
-        List<?> rows = entityManager.createNativeQuery(
-                "SELECT start_time, end_time FROM bookings " +
-                "WHERE resource_id = :resourceId AND booking_date = :date AND status = 'APPROVED' " +
-                "ORDER BY start_time")
-                .setParameter("resourceId", id)
-                .setParameter("date", date)
-                .getResultList();
-
-        List<AvailabilityResponse.TimeSlot> bookedSlots = rows.stream()
-                .map(row -> {
-                    Object[] cols = (Object[]) row;
-                    return AvailabilityResponse.TimeSlot.builder()
-                            .startTime(((java.sql.Time) cols[0]).toLocalTime())
-                            .endTime(((java.sql.Time) cols[1]).toLocalTime())
-                            .build();
-                })
-                .toList();
-
-        return AvailabilityResponse.builder()
-                .resourceId(resource.getResourceId())
-                .date(date)
-                .availabilityStart(resource.getAvailabilityStart())
-                .availabilityEnd(resource.getAvailabilityEnd())
-                .bookedSlots(bookedSlots)
-                .resourceStatus(resource.getStatus())
-                .build();
-    }
 
     @Transactional
     public ResourceResponse createResource(CreateResourceRequest request, MultipartFile image) {

@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import smartcampus.backend.dto.AvailabilityResponse;
 import smartcampus.backend.dto.CreateResourceRequest;
 import smartcampus.backend.dto.ResourceResponse;
 import smartcampus.backend.dto.UpdateResourceRequest;
@@ -48,13 +47,6 @@ public class ResourceController {
         return ResponseEntity.ok(resourceService.getResourceById(id));
     }
 
-    @GetMapping("/{id}/availability")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AvailabilityResponse> getResourceAvailability(
-            @PathVariable UUID id,
-            @RequestParam LocalDate date) {
-        return ResponseEntity.ok(resourceService.getResourceAvailability(id, date));
-    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
