@@ -1,0 +1,37 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# application.properties.example
+# Copy this file to application.properties and fill in your own values.
+# NEVER commit application.properties to Git (it is in .gitignore).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Application
+spring.application.name=smart-campus-backend
+
+# ─── Database (PostgreSQL) ───────────────────────────────────────────────────
+spring.datasource.url=jdbc:postgresql://localhost:5432/smartcampus
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_POSTGRES_PASSWORD
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# ─── OAuth2 – Google ─────────────────────────────────────────────────────────
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=openid,email,profile
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/login/oauth2/code/{registrationId}
+
+# ─── JWT ─────────────────────────────────────────────────────────────────────
+# Must be at least 32 characters
+jwt.secret=YOUR_JWT_SECRET_MIN_32_CHARACTERS_LONG
+jwt.expiration-ms=86400000
+
+# ─── App ─────────────────────────────────────────────────────────────────────
+app.frontend-url=http://localhost:5173
+
+# ─── Server ──────────────────────────────────────────────────────────────────
+server.port=8080
