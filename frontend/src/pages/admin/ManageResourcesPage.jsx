@@ -230,6 +230,8 @@ export default function ManageResourcesPage() {
             <option value="LAB">Lab</option>
             <option value="MEETING_ROOM">Meeting Room</option>
             <option value="EQUIPMENT">Equipment</option>
+            <option value="SPORTS_FACILITY">Sports Facility</option>
+            <option value="CAFETERIA">Cafeteria</option>
           </select>
           <select value={filterFloor} onChange={e => setFilterFloor(e.target.value)}>
             <option value="">All Floors</option>
@@ -404,6 +406,8 @@ export default function ManageResourcesPage() {
                       <option value="LAB">Lab</option>
                       <option value="MEETING_ROOM">Meeting Room</option>
                       <option value="EQUIPMENT">Equipment</option>
+                      <option value="SPORTS_FACILITY">Sports Facility</option>
+                      <option value="CAFETERIA">Cafeteria</option>
                     </select>
                   </div>
 
