@@ -74,6 +74,18 @@ public class BookingController {
     }
 
     // ----------------------------------------------------------------
+    // PUT /api/bookings/{id} — User edits their own PENDING/IN_REVIEW booking
+    // ----------------------------------------------------------------
+    @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BookingResponseDTO> updateBooking(
+            @PathVariable UUID id,
+            @Valid @RequestBody BookingRequestDTO request,
+            @RequestHeader("X-User-Id") UUID userId) {
+        return ResponseEntity.ok(bookingService.updateBooking(id, request, userId));
+    }
+
+    // ----------------------------------------------------------------
     // FEATURE 5 — PUT /api/bookings/{id}/review
     // ADMIN only
     // ----------------------------------------------------------------
@@ -148,9 +160,10 @@ public class BookingController {
             @RequestParam UUID resourceId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime,
+            @RequestParam(required = false) UUID excludeBookingId) {
         return ResponseEntity.ok(
-                bookingService.checkAvailability(resourceId, date, startTime, endTime));
+                bookingService.checkAvailability(resourceId, date, startTime, endTime, excludeBookingId));
     }
 
     // ----------------------------------------------------------------

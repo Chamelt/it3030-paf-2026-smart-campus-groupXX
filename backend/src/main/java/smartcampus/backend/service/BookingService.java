@@ -280,7 +280,7 @@ public class BookingService {
     // ================================================================
     @Transactional(readOnly = true)
     public AvailabilityResponseDTO checkAvailability(
-            UUID resourceId, LocalDate date, LocalTime startTime, LocalTime endTime) {
+            UUID resourceId, LocalDate date, LocalTime startTime, LocalTime endTime, UUID excludeBookingId) {
 
         Resource resource = findResource(resourceId);
 
@@ -299,7 +299,7 @@ public class BookingService {
         }
 
         boolean conflict = bookingRepository.existsConflict(
-                resourceId, date, startTime, endTime, null);
+                resourceId, date, startTime, endTime, excludeBookingId);
 
         return AvailabilityResponseDTO.builder()
                 .available(!conflict)
@@ -344,6 +344,62 @@ public class BookingService {
             result.add(new PeakHourDTO(h, hourMap.getOrDefault(h, 0L)));
         }
         return result;
+    }
+
+    // ================================================================
+    // FEATURE — PUT /api/bookings/{id} — User edits their own booking
+    // Only allowed while status is PENDING or IN_REVIEW
+    // ================================================================
+    public BookingResponseDTO updateBooking(UUID bookingId, BookingRequestDTO dto, UUID userId) {
+        Booking booking = findBooking(bookingId);
+
+        if (!booking.getUser().getUserId().equals(userId)) {
+            throw new BookingValidationException("You can only edit your own bookings");
+        }
+        if (booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.IN_REVIEW) {
+            throw new BookingValidationException("Only PENDING or IN_REVIEW bookings can be edited");
+        }
+
+        Resource resource = booking.getResource();
+
+        // Re-run validation but exclude this booking from conflict check
+        if (!dto.getStartTime().isBefore(dto.getEndTime())) {
+            throw new BookingValidationException("startTime must be before endTime");
+        }
+        LocalDateTime bookingStart = LocalDateTime.of(dto.getDate(), dto.getStartTime());
+        if (bookingStart.isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new BookingValidationException("Bookings must be made at least 2 hours in advance");
+        }
+        if (dto.getStartTime().isBefore(resource.getAvailabilityStart())) {
+            throw new BookingValidationException("startTime is before resource availability start");
+        }
+        if (dto.getEndTime().isAfter(resource.getAvailabilityEnd())) {
+            throw new BookingValidationException("endTime is after resource availability end");
+        }
+        if (resource.getCapacity() != null && dto.getExpectedAttendees() != null
+                && dto.getExpectedAttendees() > resource.getCapacity()) {
+            throw new BookingValidationException("expectedAttendees exceeds resource capacity");
+        }
+        if (bookingRepository.existsConflict(
+                resource.getResourceId(), dto.getDate(), dto.getStartTime(), dto.getEndTime(), bookingId)) {
+            throw new BookingConflictException("This time slot is already taken. Please choose a different time.");
+        }
+
+        boolean isPriority = Boolean.TRUE.equals(dto.getIsPriority());
+        if (isPriority && (dto.getPriorityReason() == null || dto.getPriorityReason().isBlank())) {
+            throw new BookingValidationException("priorityReason is required when isPriority is true");
+        }
+
+        booking.setBookingDate(dto.getDate());
+        booking.setStartTime(dto.getStartTime());
+        booking.setEndTime(dto.getEndTime());
+        booking.setPurpose(dto.getPurpose());
+        booking.setExpectedAttendees(dto.getExpectedAttendees());
+        booking.setIsPriority(isPriority);
+        booking.setPriorityReason(dto.getPriorityReason());
+        booking.setStatus(BookingStatus.PENDING);
+
+        return BookingResponseDTO.from(bookingRepository.save(booking));
     }
 
     // ================================================================

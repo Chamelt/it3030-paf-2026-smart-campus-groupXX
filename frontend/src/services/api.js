@@ -52,6 +52,9 @@ export const bookingApi = {
     getAll: (adminId, status) =>
         get(`/api/bookings${status ? `?status=${status}` : ''}`, { userId: adminId }),
 
+    update: (id, data, userId) =>
+        put(`/api/bookings/${id}`, data, { userId }),
+
     markInReview: (id, adminId) =>
         put(`/api/bookings/${id}/review`, {}, { userId: adminId }),
 
@@ -72,8 +75,11 @@ export const bookingApi = {
         return get(`/api/bookings/calendar?${p}`)
     },
 
-    checkAvailability: (resourceId, date, startTime, endTime) =>
-        get(`/api/bookings/check-availability?resourceId=${resourceId}&date=${date}&startTime=${startTime}&endTime=${endTime}`),
+    checkAvailability: (resourceId, date, startTime, endTime, excludeBookingId) => {
+        const p = new URLSearchParams({ resourceId, date, startTime, endTime })
+        if (excludeBookingId) p.set('excludeBookingId', excludeBookingId)
+        return get(`/api/bookings/check-availability?${p}`)
+    },
 
     getStats: (adminId) =>
         get('/api/bookings/stats', { userId: adminId }),

@@ -4,11 +4,13 @@ import { bookingApi } from '../services/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { StatusBadge, Spinner, EmptyState, Btn, Modal, Textarea, Toast } from '../components/ui/index.jsx'
 import { formatDate, formatTimeRange, isUpcoming } from '../utils/helpers.js'
+import BookingModal from '../components/booking/BookingModal.jsx'
 
 /* ── Booking card ────────────────────────────────────────────────────────── */
-function BookingCard({ booking, onCancel }) {
+function BookingCard({ booking, onCancel, onEdit }) {
     const upcoming = isUpcoming(booking.bookingDate)
-    const canCancel = upcoming && (booking.status === 'PENDING' || booking.status === 'IN_REVIEW')
+    const canEdit = upcoming && (booking.status === 'PENDING' || booking.status === 'IN_REVIEW')
+    const canCancel = canEdit
 
     return (
         <div className="scale-in" style={{
@@ -65,12 +67,11 @@ function BookingCard({ booking, onCancel }) {
                 </div>
             )}
 
-            {/* Cancel button */}
-            {canCancel && (
-                <div style={{ paddingTop: 8, borderTop: '1px solid var(--border-subtle)' }}>
-                    <Btn variant="danger" size="sm" onClick={() => onCancel(booking)}>
-                        Cancel booking
-                    </Btn>
+            {/* Edit / Cancel buttons */}
+            {canEdit && (
+                <div style={{ paddingTop: 8, borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: 8 }}>
+                    <Btn variant="secondary" size="sm" onClick={() => onEdit(booking)}>Edit</Btn>
+                    <Btn variant="danger" size="sm" onClick={() => onCancel(booking)}>Cancel booking</Btn>
                 </div>
             )}
         </div>
@@ -142,6 +143,7 @@ export default function MyBookingsPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [cancelTarget, setCancelTarget] = useState(null)
+    const [editTarget, setEditTarget] = useState(null)
     const [toast, setToast] = useState(null)
 
     const load = useCallback(() => {
@@ -194,7 +196,7 @@ export default function MyBookingsPage() {
                         gap: 20,
                     }}>
                         {upcoming.map(b => (
-                            <BookingCard key={b.bookingId} booking={b} onCancel={setCancelTarget} />
+                            <BookingCard key={b.bookingId} booking={b} onCancel={setCancelTarget} onEdit={setEditTarget} />
                         ))}
                     </div>
                 )}
@@ -218,6 +220,25 @@ export default function MyBookingsPage() {
                     </div>
                 )}
             </section>
+
+            {editTarget && (
+                <BookingModal
+                    resource={{
+                        resourceId: editTarget.resourceId,
+                        name: editTarget.resourceName,
+                        type: editTarget.resourceType,
+                        floor: editTarget.resourceFloor,
+                        capacity: editTarget.resourceCapacity,
+                        status: 'ACTIVE',
+                        availabilityStart: '07:00:00',
+                        availabilityEnd: '22:00:00',
+                    }}
+                    userId={currentUser?.userId}
+                    existingBooking={editTarget}
+                    onClose={() => setEditTarget(null)}
+                    onSuccess={msg => { setEditTarget(null); load(); setToast({ message: msg, type: 'success' }) }}
+                />
+            )}
 
             {cancelTarget && (
                 <CancelModal
