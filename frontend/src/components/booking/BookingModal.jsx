@@ -268,16 +268,28 @@ function getInitialStartTime() {
     return `${String(finalH).padStart(2, '0')}:${String(finalM).padStart(2, '0')}`
 }
 
-export default function BookingModal({ resource, userId, onClose, onSuccess }) {
+export default function BookingModal({ resource, userId, onClose, onSuccess, existingBooking }) {
+    const isEditing = !!existingBooking
     const initialStart = getInitialStartTime()
-    const [form, setForm] = useState({
-        date: todayISO(),
-        startTime: initialStart,
-        endTime: addThirtyMins(initialStart),
-        purpose: '',
-        expectedAttendees: '',
-        isPriority: false,
-        priorityReason: '',
+    const [form, setForm] = useState(() => {
+        if (existingBooking) return {
+            date: existingBooking.bookingDate,
+            startTime: existingBooking.startTime?.slice(0, 5),
+            endTime: existingBooking.endTime?.slice(0, 5),
+            purpose: existingBooking.purpose || '',
+            expectedAttendees: existingBooking.expectedAttendees ?? '',
+            isPriority: existingBooking.isPriority || false,
+            priorityReason: existingBooking.priorityReason || '',
+        }
+        return {
+            date: todayISO(),
+            startTime: initialStart,
+            endTime: addThirtyMins(initialStart),
+            purpose: '',
+            expectedAttendees: '',
+            isPriority: false,
+            priorityReason: '',
+        }
     })
     const [errors, setErrors] = useState({})
     const [loading, setLoading] = useState(false)
@@ -310,7 +322,8 @@ export default function BookingModal({ resource, userId, onClose, onSuccess }) {
         const t = setTimeout(() => {
             bookingApi.checkAvailability(
                 resource.resourceId, form.date,
-                form.startTime + ':00', form.endTime + ':00'
+                form.startTime + ':00', form.endTime + ':00',
+                existingBooking?.bookingId
             )
                 .then(r => { setAvail(r); setChecking(false) })
                 .catch(() => setChecking(false))
@@ -363,18 +376,24 @@ export default function BookingModal({ resource, userId, onClose, onSuccess }) {
     const handleSubmit = async () => {
         if (!validate()) return
         setLoading(true)
+        const payload = {
+            resourceId: resource.resourceId,
+            date: form.date,
+            startTime: form.startTime + ':00',
+            endTime: form.endTime + ':00',
+            purpose: form.purpose,
+            expectedAttendees: form.expectedAttendees ? Number(form.expectedAttendees) : undefined,
+            isPriority: form.isPriority,
+            priorityReason: form.priorityReason || undefined,
+        }
         try {
-            await bookingApi.create({
-                resourceId: resource.resourceId,
-                date: form.date,
-                startTime: form.startTime + ':00',
-                endTime: form.endTime + ':00',
-                purpose: form.purpose,
-                expectedAttendees: form.expectedAttendees ? Number(form.expectedAttendees) : undefined,
-                isPriority: form.isPriority,
-                priorityReason: form.priorityReason || undefined,
-            }, userId)
-            onSuccess('Booking request submitted — awaiting admin review.')
+            if (isEditing) {
+                await bookingApi.update(existingBooking.bookingId, payload, userId)
+                onSuccess('Booking updated successfully.')
+            } else {
+                await bookingApi.create(payload, userId)
+                onSuccess('Booking request submitted — awaiting admin review.')
+            }
         } catch (err) {
             setErrors({ _global: err.message })
         } finally {
@@ -520,7 +539,7 @@ export default function BookingModal({ resource, userId, onClose, onSuccess }) {
                     borderBottom: '1px solid var(--border-subtle)', flexShrink: 0,
                 }}>
                     <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 400 }}>
-                        Request a Booking
+                        {isEditing ? 'Edit Booking' : 'Request a Booking'}
                     </h2>
                     <button onClick={onClose} style={{
                         width: 40, height: 40, borderRadius: '50%', border: '1.5px solid var(--border)',
@@ -764,7 +783,7 @@ export default function BookingModal({ resource, userId, onClose, onSuccess }) {
                             onMouseLeave={e => { e.currentTarget.style.filter = '' }}
                         >
                             {loading && <span style={{ width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />}
-                            Submit Booking Request
+                            {isEditing ? 'Update Booking' : 'Submit Booking Request'}
                         </button>
 
                         {avail && !avail.available && (
