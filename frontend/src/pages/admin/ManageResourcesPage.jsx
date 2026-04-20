@@ -108,18 +108,97 @@ export default function ManageResourcesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    // ── Validation ──────────────────────────────────────────────────────────
+
+    // 1. Name required
     if (!formName.trim()) {
-      setFormError('Name is required')
+      setFormError('Resource name is required.')
       return
     }
-    if (formType !== 'EQUIPMENT' && (!formCapacity || parseInt(formCapacity) <= 0)) {
-      setFormError('Capacity is required for rooms and labs')
+    if (formName.trim().length < 3) {
+      setFormError('Resource name must be at least 3 characters.')
+      return
+    }
+    if (formName.trim().length > 255) {
+      setFormError('Resource name must be under 255 characters.')
+      return
+    }
+
+    // 2. Type required (guard against empty string)
+    if (!formType) {
+      setFormError('Please select a resource type.')
+      return
+    }
+
+    // 3. Capacity — required and positive for all non-EQUIPMENT types
+    if (formType !== 'EQUIPMENT') {
+      if (!formCapacity || formCapacity === '') {
+        setFormError('Capacity is required for rooms, labs, and facilities.')
+        return
+      }
+      const cap = parseInt(formCapacity, 10)
+      if (isNaN(cap) || cap <= 0) {
+        setFormError('Capacity must be a positive whole number.')
+        return
+      }
+      if (cap > 10000) {
+        setFormError('Capacity cannot exceed 10,000.')
+        return
+      }
+    }
+
+    // 4. Floor required
+    if (!formFloor) {
+      setFormError('Please select a floor.')
+      return
+    }
+
+    // 5. Location description required
+    if (!formLocationDescription.trim()) {
+      setFormError('Location description is required.')
+      return
+    }
+    if (formLocationDescription.trim().length < 5) {
+      setFormError('Location description must be at least 5 characters.')
+      return
+    }
+
+    // 6. Availability times — both required and in correct order
+    if (!formAvailabilityStart) {
+      setFormError('Availability start time is required.')
+      return
+    }
+    if (!formAvailabilityEnd) {
+      setFormError('Availability end time is required.')
       return
     }
     if (formAvailabilityEnd <= formAvailabilityStart) {
-      setFormError('End time must be after start time')
+      setFormError('End time must be after start time.')
       return
     }
+
+    // 7. Image file — safe file handling
+    if (formImageFile) {
+      const allowedTypes = ['image/jpeg', 'image/png']
+      if (!allowedTypes.includes(formImageFile.type)) {
+        setFormError('Only JPEG and PNG images are allowed.')
+        return
+      }
+      const maxSize = 5 * 1024 * 1024  // 5 MB in bytes
+      if (formImageFile.size > maxSize) {
+        setFormError('Image file must be under 5 MB.')
+        return
+      }
+      const allowedExtensions = ['.jpg', '.jpeg', '.png']
+      const fileName = formImageFile.name.toLowerCase()
+      const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext))
+      if (!hasValidExtension) {
+        setFormError('Image file must have a .jpg, .jpeg, or .png extension.')
+        return
+      }
+    }
+
+    // ── End of Validation ────────────────────────────────────────────────────
 
     const data = {
       name:                formName.trim(),
