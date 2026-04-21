@@ -1,77 +1,93 @@
 package smartcampus.backend.entity;
 
+
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import smartcampus.backend.enums.ResourceStatus;
 import smartcampus.backend.enums.ResourceType;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
-import org.hibernate.type.SqlTypes;
+
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "resources")
-@Getter
-@Setter
+
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "resources")
+@EntityListeners(AuditingEntityListener.class)
 public class Resource {
 
     @Id
-    @UuidGenerator
-    @Column(name = "resource_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "resource_id", updatable = false)
     private UUID resourceId;
 
-    @Column(nullable = false)
+    @NotBlank(message = "Resource name is required")
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @NotNull
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ResourceType type;
 
+
+    @Positive(message = "Capacity must be a positive number")
+    @Column
     private Integer capacity;
 
+    @NotBlank(message = "Floor is required")
     @Column(nullable = false)
     private String floor;
 
-    @Column(name = "location_description", nullable = false)
+    @NotBlank
+    @Column(name = "location_description", nullable = false, columnDefinition = "TEXT")
     private String locationDescription;
 
+    @NotNull
     @Column(name = "availability_start", nullable = false)
     private LocalTime availabilityStart;
 
+    @NotNull
     @Column(name = "availability_end", nullable = false)
     private LocalTime availabilityEnd;
 
+    @NotNull
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ResourceStatus status;
+    private ResourceStatus status = ResourceStatus.ACTIVE;
 
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
     private List<String> features;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Column(name = "created_at", updatable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }
+
