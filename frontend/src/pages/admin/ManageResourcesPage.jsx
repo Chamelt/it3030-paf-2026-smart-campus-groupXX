@@ -23,6 +23,10 @@ export default function ManageResourcesPage() {
   const [editingResource, setEditingResource] = useState(null)
   const [submitting,      setSubmitting]      = useState(false)
   const [formError,       setFormError]       = useState(null)
+  const [formErrors,      setFormErrors]      = useState({})
+
+  const clearFieldError = (field) =>
+    setFormErrors(prev => { const next = { ...prev }; delete next[field]; return next })
 
   // ── Filter state ──────────────────────────────────────────────────────────
   const [searchTerm,    setSearchTerm]    = useState('')
@@ -80,6 +84,7 @@ export default function ManageResourcesPage() {
     setFormImageFile(null)
     setEditingResource(null)
     setFormError(null)
+    setFormErrors({})
     setShowForm(true)
   }
 
@@ -95,6 +100,7 @@ export default function ManageResourcesPage() {
     setFormImageFile(null)
     setEditingResource(resource)
     setFormError(null)
+    setFormErrors({})
     setShowForm(true)
   }
 
@@ -102,6 +108,7 @@ export default function ManageResourcesPage() {
     setShowForm(false)
     setEditingResource(null)
     setFormError(null)
+    setFormErrors({})
   }
 
   // ── Submit (create or update) ─────────────────────────────────────────────
@@ -110,11 +117,24 @@ export default function ManageResourcesPage() {
 
     // ── Validation ──────────────────────────────────────────────────────────
 
-    // 1. Name required
-    if (!formName.trim()) {
-      setFormError('Resource name is required.')
+    // 1. Required-field presence check — highlights empty fields in red
+    const errors = {}
+    if (!formName.trim())                                                   errors.name                = true
+    if (!formType)                                                           errors.type                = true
+    if (formType !== 'EQUIPMENT' && (!formCapacity || formCapacity === '')) errors.capacity            = true
+    if (!formFloor)                                                          errors.floor               = true
+    if (!formLocationDescription.trim())                                     errors.locationDescription = true
+    if (!formAvailabilityStart)                                              errors.availabilityStart   = true
+    if (!formAvailabilityEnd)                                                errors.availabilityEnd     = true
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
+      setFormError('Please fill in all required fields highlighted in red.')
       return
     }
+    setFormErrors({})
+
+    // 2. Complex rules (length / format / ordering) — banner only
     if (formName.trim().length < 3) {
       setFormError('Resource name must be at least 3 characters.')
       return
@@ -124,18 +144,7 @@ export default function ManageResourcesPage() {
       return
     }
 
-    // 2. Type required (guard against empty string)
-    if (!formType) {
-      setFormError('Please select a resource type.')
-      return
-    }
-
-    // 3. Capacity — required and positive for all non-EQUIPMENT types
     if (formType !== 'EQUIPMENT') {
-      if (!formCapacity || formCapacity === '') {
-        setFormError('Capacity is required for rooms, labs, and facilities.')
-        return
-      }
       const cap = parseInt(formCapacity, 10)
       if (isNaN(cap) || cap <= 0) {
         setFormError('Capacity must be a positive whole number.')
@@ -147,37 +156,17 @@ export default function ManageResourcesPage() {
       }
     }
 
-    // 4. Floor required
-    if (!formFloor) {
-      setFormError('Please select a floor.')
-      return
-    }
-
-    // 5. Location description required
-    if (!formLocationDescription.trim()) {
-      setFormError('Location description is required.')
-      return
-    }
     if (formLocationDescription.trim().length < 5) {
       setFormError('Location description must be at least 5 characters.')
       return
     }
 
-    // 6. Availability times — both required and in correct order
-    if (!formAvailabilityStart) {
-      setFormError('Availability start time is required.')
-      return
-    }
-    if (!formAvailabilityEnd) {
-      setFormError('Availability end time is required.')
-      return
-    }
     if (formAvailabilityEnd <= formAvailabilityStart) {
       setFormError('End time must be after start time.')
       return
     }
 
-    // 7. Image file — safe file handling
+    // 3. Image file — safe file handling
     if (formImageFile) {
       const allowedTypes = ['image/jpeg', 'image/png']
       if (!allowedTypes.includes(formImageFile.type)) {
@@ -471,16 +460,20 @@ export default function ManageResourcesPage() {
                     <input
                       type="text"
                       value={formName}
-                      onChange={e => setFormName(e.target.value)}
+                      onChange={e => { setFormName(e.target.value); clearFieldError('name') }}
                       placeholder="e.g. Lecture Hall G-LH1"
-                      required
+                      className={formErrors.name ? 'error-border' : ''}
                     />
                   </div>
 
                   {/* Type */}
                   <div className="form-group">
                     <label>Type *</label>
-                    <select value={formType} onChange={e => setFormType(e.target.value)}>
+                    <select
+                      value={formType}
+                      onChange={e => { setFormType(e.target.value); clearFieldError('type') }}
+                      className={formErrors.type ? 'error-border' : ''}
+                    >
                       <option value="LECTURE_HALL">Lecture Hall</option>
                       <option value="LAB">Lab</option>
                       <option value="MEETING_ROOM">Meeting Room</option>
@@ -498,8 +491,9 @@ export default function ManageResourcesPage() {
                         type="number"
                         min="1"
                         value={formCapacity}
-                        onChange={e => setFormCapacity(e.target.value)}
+                        onChange={e => { setFormCapacity(e.target.value); clearFieldError('capacity') }}
                         placeholder="Max occupancy"
+                        className={formErrors.capacity ? 'error-border' : ''}
                       />
                     </div>
                   )}
@@ -507,7 +501,11 @@ export default function ManageResourcesPage() {
                   {/* Floor */}
                   <div className="form-group">
                     <label>Floor *</label>
-                    <select value={formFloor} onChange={e => setFormFloor(e.target.value)}>
+                    <select
+                      value={formFloor}
+                      onChange={e => { setFormFloor(e.target.value); clearFieldError('floor') }}
+                      className={formErrors.floor ? 'error-border' : ''}
+                    >
                       <option value="G">Ground Floor (G)</option>
                       <option value="1F">First Floor (1F)</option>
                       <option value="2F">Second Floor (2F)</option>
@@ -521,9 +519,10 @@ export default function ManageResourcesPage() {
                     <label>Location Description *</label>
                     <textarea
                       value={formLocationDescription}
-                      onChange={e => setFormLocationDescription(e.target.value)}
+                      onChange={e => { setFormLocationDescription(e.target.value); clearFieldError('locationDescription') }}
                       placeholder="e.g. Ground floor, east wing, main entrance side"
                       rows={2}
+                      className={formErrors.locationDescription ? 'error-border' : ''}
                     />
                   </div>
 
@@ -533,7 +532,8 @@ export default function ManageResourcesPage() {
                     <input
                       type="time"
                       value={formAvailabilityStart}
-                      onChange={e => setFormAvailabilityStart(e.target.value)}
+                      onChange={e => { setFormAvailabilityStart(e.target.value); clearFieldError('availabilityStart') }}
+                      className={formErrors.availabilityStart ? 'error-border' : ''}
                     />
                   </div>
 
@@ -543,7 +543,8 @@ export default function ManageResourcesPage() {
                     <input
                       type="time"
                       value={formAvailabilityEnd}
-                      onChange={e => setFormAvailabilityEnd(e.target.value)}
+                      onChange={e => { setFormAvailabilityEnd(e.target.value); clearFieldError('availabilityEnd') }}
+                      className={formErrors.availabilityEnd ? 'error-border' : ''}
                     />
                   </div>
 
