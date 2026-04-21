@@ -8,6 +8,7 @@ import {
   deleteResource,
 } from '../../services/resourceService'
 import './ManageResourcesPage.css'
+import QrCodeModal from '../../components/QrCodeModal'
 
 export default function ManageResourcesPage() {
   const { user } = useAuth()
@@ -27,6 +28,10 @@ export default function ManageResourcesPage() {
 
   const clearFieldError = (field) =>
     setFormErrors(prev => { const next = { ...prev }; delete next[field]; return next })
+
+  // ── QR modal state ────────────────────────────────────────────────────────
+  const [showQrModal, setShowQrModal] = useState(false)
+  const [qrResource,  setQrResource]  = useState(null)
 
   // ── Filter state ──────────────────────────────────────────────────────────
   const [searchTerm,    setSearchTerm]    = useState('')
@@ -207,13 +212,22 @@ export default function ManageResourcesPage() {
     setSubmitting(true)
     try {
       if (editingResource === null) {
-        await createResource(fd)
+        const result = await createResource(fd)
+        loadResources()
+        if (result?.type === 'EQUIPMENT') {
+          setQrResource(result)
+          setShowQrModal(true)
+          setSuccessMessage('Equipment created! QR code generated.')
+        } else {
+          closeForm()
+          setSuccessMessage('Resource created successfully.')
+        }
       } else {
         await updateResource(editingResource.resourceId, fd)
+        closeForm()
+        loadResources()
+        setSuccessMessage('Resource updated.')
       }
-      closeForm()
-      loadResources()
-      setSuccessMessage(editingResource ? 'Resource updated.' : 'Resource created.')
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to save resource.')
     } finally {
@@ -599,6 +613,18 @@ export default function ManageResourcesPage() {
         )}
 
       </main>
+
+      {showQrModal && qrResource && (
+        <QrCodeModal
+          isOpen={showQrModal}
+          onClose={() => {
+            setShowQrModal(false)
+            setQrResource(null)
+            closeForm()
+          }}
+          resource={qrResource}
+        />
+      )}
     </div>
   )
 }
