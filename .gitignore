@@ -1,0 +1,28 @@
+# ── Backend build output ────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.war
+
+# ── Secrets — NEVER commit these ───────────────────────────
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
+.vscode/launch.json
+*.env
+.env
+
+# ── Frontend dependencies and build ─────────────────────────
+frontend/node_modules/
+node_modules/
+frontend/dist/
+frontend/build/
+
+# ── OS files ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+
+# ── IDE files ────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/settings.json
