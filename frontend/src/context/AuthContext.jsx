@@ -8,7 +8,7 @@ import axiosInstance from '../api/axiosInstance'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   // On mount — if a token exists, fetch the current user profile
@@ -43,11 +43,12 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const isAdmin       = user?.role === 'ADMIN'
-  const isTechnician  = user?.role === 'TECHNICIAN'
+  const isAdmin = user?.role === 'ADMIN'
+  const isTechnician = user?.role === 'TECHNICIAN'
+  const isUser = user?.role === 'USER'
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithToken, logout, isAdmin, isTechnician }}>
+    <AuthContext.Provider value={{ user, loading, loginWithToken, logout, isAdmin, isTechnician, isUser }}>
       {children}
     </AuthContext.Provider>
   )

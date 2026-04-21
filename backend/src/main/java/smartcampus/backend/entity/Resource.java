@@ -1,5 +1,6 @@
 package smartcampus.backend.entity;
 
+
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -16,10 +17,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import smartcampus.backend.enums.ResourceStatus;
 import smartcampus.backend.enums.ResourceType;
 
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+
 
 @Data
 @Builder
@@ -40,9 +43,11 @@ public class Resource {
     private String name;
 
     @NotNull
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ResourceType type;
+
 
     @Positive(message = "Capacity must be a positive number")
     @Column
@@ -85,3 +90,4 @@ public class Resource {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }
+
