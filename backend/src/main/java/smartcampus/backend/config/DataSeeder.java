@@ -30,7 +30,8 @@ public class DataSeeder implements ApplicationRunner {
     private static final List<String> ADMIN_EMAILS = List.of(
             "himandiweerasekara2002@gmail.com",
             "vithushan0504@gmail.com",
-            "chameltsocials@gmail.com"
+            "chameltsocials@gmail.com",
+            "odevneekalansuriya@gmail.com"
     );
 
     private final UserRepository userRepository;
