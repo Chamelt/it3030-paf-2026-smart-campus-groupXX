@@ -5,14 +5,18 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 import LoginPage from './pages/LoginPage'
 import OAuth2RedirectPage from './pages/OAuth2RedirectPage'
-import DashboardPage from './pages/DashboardPage'
-import Layout from './components/Layout'
-import UserManagementPage from './pages/admin/UserManagementPage'
-import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+
+import DashboardPage      from './pages/DashboardPage'
+import Layout             from './components/Layout'
+import UserManagementPage  from './pages/admin/UserManagementPage'
+import AdminDashboardPage  from './pages/admin/AdminDashboardPage'
+import ManageResourcesPage from './pages/admin/ManageResourcesPage'
+import NotFoundPage        from './pages/NotFoundPage'
+
 import AdminBookingsPage from './pages/admin/AdminBookingsPage'
-import NotFoundPage from './pages/NotFoundPage'
 import ResourcesPage from './pages/ResourcesPage'
 import MyBookingsPage from './pages/MyBookingsPage'
+
 
 export default function App() {
   return (
@@ -32,9 +36,12 @@ export default function App() {
             <Route path="/admin/tickets" element={<ProtectedRoute role={["ADMIN", "TECHNICIAN"]}><div style={{ padding: 40 }}>Module C – All Tickets (Member 3)</div></ProtectedRoute>} />
 
             {/* Protected — ADMIN only */}
-            <Route path="/admin/users" element={<ProtectedRoute role="ADMIN"><UserManagementPage /></ProtectedRoute>} />
-            <Route path="/admin/bookings" element={<ProtectedRoute role="ADMIN"><AdminBookingsPage /></ProtectedRoute>} />
-            <Route path="/admin/resources" element={<ProtectedRoute role="ADMIN"><div style={{ padding: 40 }}>Module A – Manage Resources (Member 1)</div></ProtectedRoute>} />
+
+            <Route path="/admin/users"     element={<ProtectedRoute role="ADMIN"><UserManagementPage /></ProtectedRoute>} />
+            <Route path="/admin/bookings"  element={<ProtectedRoute role="ADMIN"><AdminBookingsPage /></ProtectedRoute>} />
+            <Route path="/admin/resources" element={<ProtectedRoute role="ADMIN"><ManageResourcesPage /></ProtectedRoute>} />
+
+          
 
             {/* Placeholders — other modules will fill these in */}
             <Route path="/resources" element={<ResourcesPage />} />
