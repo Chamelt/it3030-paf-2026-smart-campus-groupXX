@@ -5,8 +5,7 @@ backend/target/
 *.war
 
 # ── Secrets — NEVER commit these ───────────────────────────
-backend/src/main/resources/application.properties
-backend/src/main/resources/application-*.properties
+
 .vscode/launch.json
 *.env
 .env
@@ -61,8 +60,6 @@ build/
 ### VS Code ###
 .vscode/
 
-### Backend — secrets (never commit real credentials) ###
-**/src/main/resources/application.properties
 
 ### Frontend ###
 frontend/node_modules/
