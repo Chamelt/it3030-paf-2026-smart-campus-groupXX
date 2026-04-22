@@ -245,10 +245,10 @@ public class TicketService {
                 .map(r -> ResourceDropdownResponse.builder()
                         .resourceId(r.getResourceId())
                         .name(r.getName())
-                        .type(r.getType())
+                        .type(r.getType().name())
                         .floor(r.getFloor())
                         .capacity(r.getCapacity())
-                        .status(r.getStatus())
+                        .status(r.getStatus().name())
                         .build())
                 .toList();
     }
