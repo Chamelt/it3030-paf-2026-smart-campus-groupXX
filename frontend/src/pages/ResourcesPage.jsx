@@ -7,7 +7,7 @@ import BookingModal from '../components/booking/BookingModal.jsx'
 import { getIcon, RESOURCE_LABEL, RESOURCE_TYPE_COLOR } from '../utils/helpers.js'
 import './ResourcesPage.css'
 
-const FILTERS = ['ALL', 'LECTURE_HALL', 'LAB', 'MEETING_ROOM', 'EQUIPMENT']
+const FILTERS = ['ALL', 'LECTURE_HALL', 'LAB', 'MEETING_ROOM', 'EQUIPMENT', 'SPORTS_FACILITY', 'CAFETERIA']
 const FILTER_LABEL = { ALL: 'All Types', ...RESOURCE_LABEL }
 
 function TypeBadge({ type }) {
@@ -86,6 +86,8 @@ export default function ResourcesPage() {
     const [error, setError] = useState(null)
     const [search, setSearch] = useState('')
     const [typeFilter, setType] = useState('ALL')
+    const [floorFilter, setFloorFilter] = useState('ALL')
+    const [statusFilter, setStatusFilter] = useState('ACTIVE')
     const [bookTarget, setBookTarget] = useState(null)
     const [toast, setToast] = useState(null)
 
@@ -97,36 +99,66 @@ export default function ResourcesPage() {
     }, [])
 
     const filtered = resources.filter(r => {
-        const s = r.name.toLowerCase().includes(search.toLowerCase()) ||
-            r.locationDescription?.toLowerCase().includes(search.toLowerCase())
-        return (s) && (typeFilter === 'ALL' || r.type === typeFilter)
+        const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase()) || (r.locationDescription?.toLowerCase() || '').includes(search.toLowerCase())
+        const matchesType = typeFilter === 'ALL' || r.type === typeFilter
+        const matchesFloor = floorFilter === 'ALL' || r.floor === floorFilter
+        const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter
+        return matchesSearch && matchesType && matchesFloor && matchesStatus
     })
 
     return (
         <div className="resources-page">
-            <div className="resources-page-header">
-                <h1>Resources</h1>
-                <p>Browse and book campus facilities and equipment</p>
+            <div className="resources-hero">
+                <img src="/campus_resources.png" className="resources-hero-img" alt="" />
+                <div className="resources-hero-overlay">
+                    <h1>🏢 Campus Resources</h1>
+                    <p>Horizonia University — Browse and book facilities &amp; equipment</p>
+                </div>
             </div>
 
-            <div className="resources-filter-bar">
-                <input
-                    className="resources-search-input"
-                    placeholder="Search resources…"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                />
-                <div className="resources-filter-buttons">
-                    {FILTERS.map(f => (
-                        <button
-                            key={f}
-                            onClick={() => setType(f)}
-                            className={`resources-filter-btn${typeFilter === f ? ' active' : ''}`}
-                        >
-                            {FILTER_LABEL[f]}
-                        </button>
-                    ))}
+            <main className="resources-main">
+            <div className="resources-filter-container">
+                <div className="resources-filter-bar-card">
+                    <input
+                        className="resources-search-input"
+                        placeholder="Search name or location…"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                    />
+                    <select
+                        className="resources-filter-select"
+                        value={typeFilter}
+                        onChange={e => setType(e.target.value)}
+                    >
+                        {FILTERS.map(f => (
+                            <option key={f} value={f}>{FILTER_LABEL[f]}</option>
+                        ))}
+                    </select>
+                    <select
+                        className="resources-filter-select"
+                        value={floorFilter}
+                        onChange={e => setFloorFilter(e.target.value)}
+                    >
+                        <option value="ALL">All Floors</option>
+                        <option value="G">Ground (G)</option>
+                        <option value="1F">First (1F)</option>
+                        <option value="2F">Second (2F)</option>
+                        <option value="3F">Third (3F)</option>
+                        <option value="B">Basement (B)</option>
+                    </select>
+                    <select
+                        className="resources-filter-select"
+                        value={statusFilter}
+                        onChange={e => setStatusFilter(e.target.value)}
+                    >
+                        <option value="ALL">All Statuses</option>
+                        <option value="ACTIVE">Active Only</option>
+                        <option value="OUT_OF_SERVICE">Out of Service</option>
+                    </select>
                 </div>
+                <p className="resources-filter-count">
+                    Showing {filtered.length} of {resources.length} resources
+                </p>
             </div>
 
             {loading && <Spinner />}
@@ -149,6 +181,7 @@ export default function ResourcesPage() {
                 />
             )}
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            </main>
         </div>
     )
 }
