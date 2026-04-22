@@ -51,15 +51,19 @@ export const getStatus = (s) => STATUS_META[s] || STATUS_META.PENDING
 // ── Resource metadata ────────────────────────────────────────────────────
 export const RESOURCE_ICON = {
     LECTURE_HALL: '🏛️', LAB: '🔬', MEETING_ROOM: '🪑', EQUIPMENT: '🎛️',
+    SPORTS_FACILITY: '⚽', CAFETERIA: '☕',
 }
 export const RESOURCE_LABEL = {
     LECTURE_HALL: 'Lecture Hall', LAB: 'Lab', MEETING_ROOM: 'Meeting Room', EQUIPMENT: 'Equipment',
+    SPORTS_FACILITY: 'Sports Facility', CAFETERIA: 'Cafeteria',
 }
 export const RESOURCE_TYPE_COLOR = {
     LECTURE_HALL: { color: '#1e6b3f', bg: '#f2faf5', border: '#b8e6ca' },
     LAB: { color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe' },
     MEETING_ROOM: { color: '#92400e', bg: '#fffbeb', border: '#fde68a' },
     EQUIPMENT: { color: '#6b21a8', bg: '#faf5ff', border: '#e9d5ff' },
+    SPORTS_FACILITY: { color: '#166534', bg: '#dcfce7', border: '#86efac' },
+    CAFETERIA: { color: '#92400e', bg: '#fef3c7', border: '#fde68a' },
 }
 export const getIcon = (t) => RESOURCE_ICON[t] || '📍'
 export const getLabel = (t) => RESOURCE_LABEL[t] || t
