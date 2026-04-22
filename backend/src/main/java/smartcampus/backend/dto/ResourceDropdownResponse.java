@@ -2,8 +2,6 @@ package smartcampus.backend.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import smartcampus.backend.enums.ResourceStatus;
-import smartcampus.backend.enums.ResourceType;
 
 import java.util.UUID;
 
@@ -13,8 +11,8 @@ public class ResourceDropdownResponse {
 
     private UUID resourceId;
     private String name;
-    private ResourceType type;
+    private String type;
     private String floor;
     private Integer capacity;
-    private ResourceStatus status;
+    private String status;
 }
