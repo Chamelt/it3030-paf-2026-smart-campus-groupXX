@@ -67,7 +67,7 @@ public class ResourceController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
     public ResponseEntity<ResourceResponse> updateResourceStatus(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
