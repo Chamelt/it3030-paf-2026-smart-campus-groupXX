@@ -36,4 +36,10 @@ public interface ResourceRepository extends JpaRepository<Resource, UUID> {
     List<Resource> findByStatus(ResourceStatus status);
 
     boolean existsByNameAndFloor(String name, String floor);
+
+    @Query("SELECT DISTINCT CAST(r.type AS string) FROM Resource r WHERE r.status = smartcampus.backend.enums.ResourceStatus.ACTIVE")
+    List<String> findDistinctActiveTypes();
+
+    @Query("SELECT DISTINCT r.floor FROM Resource r WHERE r.status = smartcampus.backend.enums.ResourceStatus.ACTIVE ORDER BY r.floor")
+    List<String> findDistinctActiveFloors();
 }

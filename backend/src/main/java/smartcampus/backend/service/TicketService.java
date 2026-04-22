@@ -127,8 +127,8 @@ public class TicketService {
     public TicketResponse assignTechnician(UUID ticketId, AssignTicketRequest request) {
         Ticket ticket = findTicketOrThrow(ticketId);
 
-        if (ticket.getStatus() != TicketStatus.OPEN) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket must be OPEN to assign a technician");
+        if (ticket.getStatus() != TicketStatus.OPEN && ticket.getStatus() != TicketStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket must be OPEN or PENDING to assign a technician");
         }
 
         User technician = userRepository.findById(request.getTechnicianId())
@@ -139,7 +139,7 @@ public class TicketService {
         }
 
         ticket.setAssignedTo(technician);
-        ticket.setStatus(TicketStatus.IN_PROGRESS);
+        ticket.setStatus(TicketStatus.ASSIGNED);
         ticket.setAssignedAt(LocalDateTime.now());
 
         return toResponse(ticketRepository.save(ticket));
@@ -154,11 +154,12 @@ public class TicketService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not assigned to this ticket");
         }
 
-        if (ticket.getStatus() != TicketStatus.IN_PROGRESS) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket must be IN_PROGRESS to accept");
+        if (ticket.getStatus() != TicketStatus.ASSIGNED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket must be ASSIGNED to accept");
         }
 
         ticket.setAcceptedAt(LocalDateTime.now());
+        ticket.setStatus(TicketStatus.IN_PROGRESS);
 
         if (markOutOfService && ticket.getResourceId() != null) {
             resourceRepository.findById(ticket.getResourceId()).ifPresent(resource -> {
@@ -235,21 +236,11 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public List<ResourceDropdownResponse> getResourcesByFloorAndType(String floor, String type) {
-        ResourceType resourceType;
-        try {
-            resourceType = ResourceType.valueOf(type.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid resource type: " + type);
-        }
-
+    public List<ResourceDropdownResponse> getResourcesForDropdown(String floor, String type) {
+        String typeParam  = (type  != null && !type.isBlank())  ? type  : null;
         String floorParam = (floor != null && !floor.isBlank()) ? floor : null;
 
-        return resourceRepository.findAllWithFilters(
-                        resourceType.name(),
-                        ResourceStatus.ACTIVE.name(),
-                        floorParam,
-                        null, null, null)
+        return resourceRepository.findAllWithFilters(typeParam, "ACTIVE", floorParam, null, null, null)
                 .stream()
                 .map(r -> ResourceDropdownResponse.builder()
                         .resourceId(r.getResourceId())
@@ -260,6 +251,16 @@ public class TicketService {
                         .status(r.getStatus())
                         .build())
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getDistinctResourceTypes() {
+        return resourceRepository.findDistinctActiveTypes();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getDistinctFloors() {
+        return resourceRepository.findDistinctActiveFloors();
     }
 
     @Transactional
