@@ -52,6 +52,11 @@ export default function Sidebar() {
                  🏢 Manage Resources
                </NavLink>
             )}
+            {isTechnician && (
+               <NavLink to="/technician/scan" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+                 📷 Scan QR Code
+               </NavLink>
+            )}
           </>
         )}
       </div>
