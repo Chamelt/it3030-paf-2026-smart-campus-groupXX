@@ -1,3 +1,31 @@
+# ── Backend build output ────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.war
+
+# ── Secrets — NEVER commit these ───────────────────────────
+
+.vscode/launch.json
+*.env
+.env
+
+# ── Frontend dependencies and build ─────────────────────────
+frontend/node_modules/
+node_modules/
+frontend/dist/
+frontend/build/
+
+# ── OS files ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+
+# ── IDE files ────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/settings.json
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -32,8 +60,6 @@ build/
 ### VS Code ###
 .vscode/
 
-### Backend — secrets (never commit real credentials) ###
-**/src/main/resources/application.properties
 
 ### Frontend ###
 frontend/node_modules/
@@ -42,3 +68,4 @@ frontend/coverage/
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
+
