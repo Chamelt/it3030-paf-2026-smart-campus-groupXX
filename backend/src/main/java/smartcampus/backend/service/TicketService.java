@@ -317,7 +317,7 @@ public class TicketService {
         List<TicketComment> activeComments =
                 commentRepository.findByTicketAndIsDeletedFalseOrderByCreatedAtAsc(ticket);
 
-        List<TicketResponse.AttachmentDto> attachmentDtos = ticket.getAttachments().stream()
+        List<TicketResponse.AttachmentDto> attachmentDtos = attachmentRepository.findByTicket(ticket).stream()
                 .map(a -> TicketResponse.AttachmentDto.builder()
                         .attachmentId(a.getAttachmentId())
                         .fileName(a.getFileName())
