@@ -115,10 +115,10 @@
 
 /* ── Resource card ────────────────────────────────────────────────────────── */
 .resource-card {
-  background: var(--white);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -243,12 +243,13 @@
 
 /* ── Feature tag ──────────────────────────────────────────────────────────── */
 .feature-tag-pill {
-  font-size: 14px;
-  padding: 4px 12px;
-  border-radius: var(--r-full);
-  background: var(--gray100);
-  color: var(--text-sec);
-  border: 1px solid var(--border);
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
 }
 
 /* ── Error text ───────────────────────────────────────────────────────────── */
