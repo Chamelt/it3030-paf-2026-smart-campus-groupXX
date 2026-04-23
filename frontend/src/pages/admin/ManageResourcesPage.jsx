@@ -9,6 +9,8 @@ import {
 } from '../../services/resourceService'
 import './ManageResourcesPage.css'
 import QrCodeModal from '../../components/QrCodeModal'
+import ResourceHero from '../../components/resources/ResourceHero.jsx'
+import ResourceTableRow from '../../components/resources/admin/ResourceTableRow.jsx'
 
 export default function ManageResourcesPage() {
   const { user } = useAuth()
@@ -273,13 +275,11 @@ export default function ManageResourcesPage() {
     <div className="manage-resources-page">
 
       {/* ── Hero ── */}
-      <div className="resources-hero">
-        <img src="/campus_resources.png" className="resources-hero-img" alt="" />
-        <div className="resources-hero-overlay">
-          <h1>🏢 Manage Resources</h1>
-          <p>Horizonia University — Campus Facilities &amp; Equipment</p>
-        </div>
-      </div>
+      <ResourceHero
+        title="🏢 Manage Resources"
+        subtitle="Horizonia University — Campus Facilities & Equipment"
+        imageSrc="/campus_resources.png"
+      />
 
       <main className="resources-main">
 
@@ -359,98 +359,15 @@ export default function ManageResourcesPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredResources.map(resource => {
-                  const features = resource.features || []
-                  const visibleFeatures = features.slice(0, 3)
-                  const extraCount = features.length - 3
-
-                  return (
-                    <tr
-                      key={resource.resourceId}
-                      className={resource.status === 'DECOMMISSIONED' ? 'decommissioned' : ''}
-                    >
-                      {/* Image */}
-                      <td>
-                        {resource.imageUrl
-                          ? <img src={resource.imageUrl} className="resource-thumb" alt={resource.name} />
-                          : <div className="resource-thumb-placeholder">🏛️</div>
-                        }
-                      </td>
-
-                      {/* Name */}
-                      <td><strong>{resource.name}</strong></td>
-
-                      {/* Type */}
-                      <td>
-                        <span className={`type-badge type-${resource.type}`}>
-                          {resource.type.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-
-                      {/* Floor */}
-                      <td>{resource.floor}</td>
-
-                      {/* Capacity */}
-                      <td>{resource.capacity ?? '—'}</td>
-
-                      {/* Features */}
-                      <td>
-                        {visibleFeatures.map(f => (
-                          <span key={f} className="feature-pill">{f}</span>
-                        ))}
-                        {extraCount > 0 && (
-                          <span className="feature-pill">+{extraCount} more</span>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td>
-                        <span className={`status-badge status-${resource.status}`}>
-                          {resource.status.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-
-                      {/* Actions */}
-                      <td>
-                        <div className="actions-cell">
-                          <button
-                            className="btn-secondary"
-                            onClick={() => openEditForm(resource)}
-                          >
-                            Edit
-                          </button>
-
-                          {resource.status !== 'DECOMMISSIONED' && (
-                            resource.status === 'ACTIVE'
-                              ? (
-                                <button
-                                  className="btn-warning"
-                                  onClick={() => handleStatusChange(resource.resourceId, 'OUT_OF_SERVICE')}
-                                >
-                                  Out of Service
-                                </button>
-                              ) : (
-                                <button
-                                  className="btn-success"
-                                  onClick={() => handleStatusChange(resource.resourceId, 'ACTIVE')}
-                                >
-                                  Set Active
-                                </button>
-                              )
-                          )}
-
-                          <button
-                            className="btn-danger"
-                            onClick={() => handleDelete(resource.resourceId)}
-                            disabled={resource.status === 'DECOMMISSIONED'}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
+                {filteredResources.map(resource => (
+                  <ResourceTableRow
+                    key={resource.resourceId}
+                    resource={resource}
+                    onEdit={openEditForm}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleDelete}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
