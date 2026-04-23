@@ -9,6 +9,7 @@ backend/target/
 .vscode/launch.json
 *.env
 .env
+backend/src/main/resources/application.properties
 
 # ── Frontend dependencies and build ─────────────────────────
 frontend/node_modules/
