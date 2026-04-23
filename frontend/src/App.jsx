@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import { AuthProvider } from './context/AuthContext'
+import { NotificationProvider } from './context/NotificationContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
 import LoginPage from './pages/LoginPage'
@@ -17,12 +18,15 @@ import AdminBookingsPage from './pages/admin/AdminBookingsPage'
 import ResourcesPage from './pages/ResourcesPage'
 import MyBookingsPage from './pages/MyBookingsPage'
 import QrScannerPage from './pages/QrScannerPage'
+import NotificationsPage from './pages/NotificationsPage'
+import BroadcastPage from './pages/admin/BroadcastPage'
 
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <NotificationProvider>
         <Routes>
           {/* Public */}
           <Route path="/login" element={<LoginPage />} />
@@ -53,12 +57,17 @@ export default function App() {
             <Route path="/tickets/my" element={<div style={{ padding: 40 }}>Module C – My Tickets (Member 3)</div>} />
             <Route path="/tickets/new" element={<div style={{ padding: 40 }}>Module C – New Ticket (Member 3)</div>} />
             <Route path="/tickets/:id" element={<div style={{ padding: 40 }}>Module C – Ticket Detail (Member 3)</div>} />
+
+            {/* Module D – Notifications */}
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/admin/broadcast" element={<ProtectedRoute role="ADMIN"><BroadcastPage /></ProtectedRoute>} />
           </Route>
 
           {/* Error pages */}
           <Route path="/403" element={<NotFoundPage code={403} message="You don't have permission to view this page." />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   )
