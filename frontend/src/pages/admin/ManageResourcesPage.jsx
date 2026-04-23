@@ -8,6 +8,9 @@ import {
   deleteResource,
 } from '../../services/resourceService'
 import './ManageResourcesPage.css'
+import QrCodeModal from '../../components/QrCodeModal'
+import ResourceHero from '../../components/resources/ResourceHero.jsx'
+import ResourceTableRow from '../../components/resources/admin/ResourceTableRow.jsx'
 
 export default function ManageResourcesPage() {
   const { user } = useAuth()
@@ -23,6 +26,14 @@ export default function ManageResourcesPage() {
   const [editingResource, setEditingResource] = useState(null)
   const [submitting,      setSubmitting]      = useState(false)
   const [formError,       setFormError]       = useState(null)
+  const [formErrors,      setFormErrors]      = useState({})
+
+  const clearFieldError = (field) =>
+    setFormErrors(prev => { const next = { ...prev }; delete next[field]; return next })
+
+  // ── QR modal state ────────────────────────────────────────────────────────
+  const [showQrModal, setShowQrModal] = useState(false)
+  const [qrResource,  setQrResource]  = useState(null)
 
   // ── Filter state ──────────────────────────────────────────────────────────
   const [searchTerm,    setSearchTerm]    = useState('')
@@ -80,6 +91,7 @@ export default function ManageResourcesPage() {
     setFormImageFile(null)
     setEditingResource(null)
     setFormError(null)
+    setFormErrors({})
     setShowForm(true)
   }
 
@@ -95,6 +107,7 @@ export default function ManageResourcesPage() {
     setFormImageFile(null)
     setEditingResource(resource)
     setFormError(null)
+    setFormErrors({})
     setShowForm(true)
   }
 
@@ -102,6 +115,7 @@ export default function ManageResourcesPage() {
     setShowForm(false)
     setEditingResource(null)
     setFormError(null)
+    setFormErrors({})
   }
 
   // ── Submit (create or update) ─────────────────────────────────────────────
@@ -110,11 +124,24 @@ export default function ManageResourcesPage() {
 
     // ── Validation ──────────────────────────────────────────────────────────
 
-    // 1. Name required
-    if (!formName.trim()) {
-      setFormError('Resource name is required.')
+    // 1. Required-field presence check — highlights empty fields in red
+    const errors = {}
+    if (!formName.trim())                                                   errors.name                = true
+    if (!formType)                                                           errors.type                = true
+    if (formType !== 'EQUIPMENT' && (!formCapacity || formCapacity === '')) errors.capacity            = true
+    if (!formFloor)                                                          errors.floor               = true
+    if (!formLocationDescription.trim())                                     errors.locationDescription = true
+    if (!formAvailabilityStart)                                              errors.availabilityStart   = true
+    if (!formAvailabilityEnd)                                                errors.availabilityEnd     = true
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
+      setFormError('Please fill in all required fields highlighted in red.')
       return
     }
+    setFormErrors({})
+
+    // 2. Complex rules (length / format / ordering) — banner only
     if (formName.trim().length < 3) {
       setFormError('Resource name must be at least 3 characters.')
       return
@@ -124,18 +151,7 @@ export default function ManageResourcesPage() {
       return
     }
 
-    // 2. Type required (guard against empty string)
-    if (!formType) {
-      setFormError('Please select a resource type.')
-      return
-    }
-
-    // 3. Capacity — required and positive for all non-EQUIPMENT types
     if (formType !== 'EQUIPMENT') {
-      if (!formCapacity || formCapacity === '') {
-        setFormError('Capacity is required for rooms, labs, and facilities.')
-        return
-      }
       const cap = parseInt(formCapacity, 10)
       if (isNaN(cap) || cap <= 0) {
         setFormError('Capacity must be a positive whole number.')
@@ -147,37 +163,17 @@ export default function ManageResourcesPage() {
       }
     }
 
-    // 4. Floor required
-    if (!formFloor) {
-      setFormError('Please select a floor.')
-      return
-    }
-
-    // 5. Location description required
-    if (!formLocationDescription.trim()) {
-      setFormError('Location description is required.')
-      return
-    }
     if (formLocationDescription.trim().length < 5) {
       setFormError('Location description must be at least 5 characters.')
       return
     }
 
-    // 6. Availability times — both required and in correct order
-    if (!formAvailabilityStart) {
-      setFormError('Availability start time is required.')
-      return
-    }
-    if (!formAvailabilityEnd) {
-      setFormError('Availability end time is required.')
-      return
-    }
     if (formAvailabilityEnd <= formAvailabilityStart) {
       setFormError('End time must be after start time.')
       return
     }
 
-    // 7. Image file — safe file handling
+    // 3. Image file — safe file handling
     if (formImageFile) {
       const allowedTypes = ['image/jpeg', 'image/png']
       if (!allowedTypes.includes(formImageFile.type)) {
@@ -218,13 +214,22 @@ export default function ManageResourcesPage() {
     setSubmitting(true)
     try {
       if (editingResource === null) {
-        await createResource(fd)
+        const result = await createResource(fd)
+        loadResources()
+        if (result?.type === 'EQUIPMENT') {
+          setQrResource(result)
+          setShowQrModal(true)
+          setSuccessMessage('Equipment created! QR code generated.')
+        } else {
+          closeForm()
+          setSuccessMessage('Resource created successfully.')
+        }
       } else {
         await updateResource(editingResource.resourceId, fd)
+        closeForm()
+        loadResources()
+        setSuccessMessage('Resource updated.')
       }
-      closeForm()
-      loadResources()
-      setSuccessMessage(editingResource ? 'Resource updated.' : 'Resource created.')
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to save resource.')
     } finally {
@@ -270,13 +275,11 @@ export default function ManageResourcesPage() {
     <div className="manage-resources-page">
 
       {/* ── Hero ── */}
-      <div className="resources-hero">
-        <img src="/campus_resources.png" className="resources-hero-img" alt="" />
-        <div className="resources-hero-overlay">
-          <h1>🏢 Manage Resources</h1>
-          <p>Horizonia University — Campus Facilities &amp; Equipment</p>
-        </div>
-      </div>
+      <ResourceHero
+        title="🏢 Manage Resources"
+        subtitle="Horizonia University — Campus Facilities & Equipment"
+        imageSrc="/campus_resources.png"
+      />
 
       <main className="resources-main">
 
@@ -356,98 +359,15 @@ export default function ManageResourcesPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredResources.map(resource => {
-                  const features = resource.features || []
-                  const visibleFeatures = features.slice(0, 3)
-                  const extraCount = features.length - 3
-
-                  return (
-                    <tr
-                      key={resource.resourceId}
-                      className={resource.status === 'DECOMMISSIONED' ? 'decommissioned' : ''}
-                    >
-                      {/* Image */}
-                      <td>
-                        {resource.imageUrl
-                          ? <img src={resource.imageUrl} className="resource-thumb" alt={resource.name} />
-                          : <div className="resource-thumb-placeholder">🏛️</div>
-                        }
-                      </td>
-
-                      {/* Name */}
-                      <td><strong>{resource.name}</strong></td>
-
-                      {/* Type */}
-                      <td>
-                        <span className={`type-badge type-${resource.type}`}>
-                          {resource.type.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-
-                      {/* Floor */}
-                      <td>{resource.floor}</td>
-
-                      {/* Capacity */}
-                      <td>{resource.capacity ?? '—'}</td>
-
-                      {/* Features */}
-                      <td>
-                        {visibleFeatures.map(f => (
-                          <span key={f} className="feature-pill">{f}</span>
-                        ))}
-                        {extraCount > 0 && (
-                          <span className="feature-pill">+{extraCount} more</span>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td>
-                        <span className={`status-badge status-${resource.status}`}>
-                          {resource.status.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-
-                      {/* Actions */}
-                      <td>
-                        <div className="actions-cell">
-                          <button
-                            className="btn-secondary"
-                            onClick={() => openEditForm(resource)}
-                          >
-                            Edit
-                          </button>
-
-                          {resource.status !== 'DECOMMISSIONED' && (
-                            resource.status === 'ACTIVE'
-                              ? (
-                                <button
-                                  className="btn-warning"
-                                  onClick={() => handleStatusChange(resource.resourceId, 'OUT_OF_SERVICE')}
-                                >
-                                  Out of Service
-                                </button>
-                              ) : (
-                                <button
-                                  className="btn-success"
-                                  onClick={() => handleStatusChange(resource.resourceId, 'ACTIVE')}
-                                >
-                                  Set Active
-                                </button>
-                              )
-                          )}
-
-                          <button
-                            className="btn-danger"
-                            onClick={() => handleDelete(resource.resourceId)}
-                            disabled={resource.status === 'DECOMMISSIONED'}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
+                {filteredResources.map(resource => (
+                  <ResourceTableRow
+                    key={resource.resourceId}
+                    resource={resource}
+                    onEdit={openEditForm}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleDelete}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
@@ -471,16 +391,20 @@ export default function ManageResourcesPage() {
                     <input
                       type="text"
                       value={formName}
-                      onChange={e => setFormName(e.target.value)}
+                      onChange={e => { setFormName(e.target.value); clearFieldError('name') }}
                       placeholder="e.g. Lecture Hall G-LH1"
-                      required
+                      className={formErrors.name ? 'error-border' : ''}
                     />
                   </div>
 
                   {/* Type */}
                   <div className="form-group">
                     <label>Type *</label>
-                    <select value={formType} onChange={e => setFormType(e.target.value)}>
+                    <select
+                      value={formType}
+                      onChange={e => { setFormType(e.target.value); clearFieldError('type') }}
+                      className={formErrors.type ? 'error-border' : ''}
+                    >
                       <option value="LECTURE_HALL">Lecture Hall</option>
                       <option value="LAB">Lab</option>
                       <option value="MEETING_ROOM">Meeting Room</option>
@@ -498,8 +422,9 @@ export default function ManageResourcesPage() {
                         type="number"
                         min="1"
                         value={formCapacity}
-                        onChange={e => setFormCapacity(e.target.value)}
+                        onChange={e => { setFormCapacity(e.target.value); clearFieldError('capacity') }}
                         placeholder="Max occupancy"
+                        className={formErrors.capacity ? 'error-border' : ''}
                       />
                     </div>
                   )}
@@ -507,7 +432,11 @@ export default function ManageResourcesPage() {
                   {/* Floor */}
                   <div className="form-group">
                     <label>Floor *</label>
-                    <select value={formFloor} onChange={e => setFormFloor(e.target.value)}>
+                    <select
+                      value={formFloor}
+                      onChange={e => { setFormFloor(e.target.value); clearFieldError('floor') }}
+                      className={formErrors.floor ? 'error-border' : ''}
+                    >
                       <option value="G">Ground Floor (G)</option>
                       <option value="1F">First Floor (1F)</option>
                       <option value="2F">Second Floor (2F)</option>
@@ -521,9 +450,10 @@ export default function ManageResourcesPage() {
                     <label>Location Description *</label>
                     <textarea
                       value={formLocationDescription}
-                      onChange={e => setFormLocationDescription(e.target.value)}
+                      onChange={e => { setFormLocationDescription(e.target.value); clearFieldError('locationDescription') }}
                       placeholder="e.g. Ground floor, east wing, main entrance side"
                       rows={2}
+                      className={formErrors.locationDescription ? 'error-border' : ''}
                     />
                   </div>
 
@@ -533,7 +463,8 @@ export default function ManageResourcesPage() {
                     <input
                       type="time"
                       value={formAvailabilityStart}
-                      onChange={e => setFormAvailabilityStart(e.target.value)}
+                      onChange={e => { setFormAvailabilityStart(e.target.value); clearFieldError('availabilityStart') }}
+                      className={formErrors.availabilityStart ? 'error-border' : ''}
                     />
                   </div>
 
@@ -543,7 +474,8 @@ export default function ManageResourcesPage() {
                     <input
                       type="time"
                       value={formAvailabilityEnd}
-                      onChange={e => setFormAvailabilityEnd(e.target.value)}
+                      onChange={e => { setFormAvailabilityEnd(e.target.value); clearFieldError('availabilityEnd') }}
+                      className={formErrors.availabilityEnd ? 'error-border' : ''}
                     />
                   </div>
 
@@ -598,6 +530,18 @@ export default function ManageResourcesPage() {
         )}
 
       </main>
+
+      {showQrModal && qrResource && (
+        <QrCodeModal
+          isOpen={showQrModal}
+          onClose={() => {
+            setShowQrModal(false)
+            setQrResource(null)
+            closeForm()
+          }}
+          resource={qrResource}
+        />
+      )}
     </div>
   )
 }

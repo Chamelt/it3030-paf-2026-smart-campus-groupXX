@@ -16,6 +16,7 @@ import NotFoundPage        from './pages/NotFoundPage'
 import AdminBookingsPage from './pages/admin/AdminBookingsPage'
 import ResourcesPage from './pages/ResourcesPage'
 import MyBookingsPage from './pages/MyBookingsPage'
+import QrScannerPage from './pages/QrScannerPage'
 
 
 export default function App() {
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/bookings/my" element={<MyBookingsPage />} />
             <Route path="/bookings/new" element={<div style={{ padding: 40 }}>Module B – New Booking (Member 2)</div>} />
             <Route path="/bookings/calendar" element={<div style={{ padding: 40 }}>Module B – Calendar (Member 2)</div>} />
+            <Route path="/technician/scan" element={<QrScannerPage />} />
             <Route path="/tickets/my" element={<div style={{ padding: 40 }}>Module C – My Tickets (Member 3)</div>} />
             <Route path="/tickets/new" element={<div style={{ padding: 40 }}>Module C – New Ticket (Member 3)</div>} />
             <Route path="/tickets/:id" element={<div style={{ padding: 40 }}>Module C – Ticket Detail (Member 3)</div>} />
