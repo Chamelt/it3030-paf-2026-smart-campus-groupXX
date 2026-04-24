@@ -225,12 +225,29 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     public List<TechnicianDropdownResponse> getTechniciansByCategory(TicketCategory category) {
+        if (category == null) {
+            // Return all technicians with their first specialty
+            return userRepository.findAllByRole(UserRole.TECHNICIAN).stream()
+                    .map(user -> {
+                        List<TechnicianSpecialty> specs = specialtyRepository.findByTechnician(user);
+                        String specialty = specs.isEmpty() ? null : specs.get(0).getSpecialty().name();
+                        return TechnicianDropdownResponse.builder()
+                                .userId(user.getUserId())
+                                .name(user.getName())
+                                .email(user.getEmail())
+                                .isAvailable(true)
+                                .specialty(specialty)
+                                .build();
+                    })
+                    .toList();
+        }
         return specialtyRepository.findBySpecialtyAndIsAvailableTrue(category).stream()
                 .map(spec -> TechnicianDropdownResponse.builder()
                         .userId(spec.getTechnician().getUserId())
                         .name(spec.getTechnician().getName())
                         .email(spec.getTechnician().getEmail())
                         .isAvailable(Boolean.TRUE.equals(spec.getIsAvailable()))
+                        .specialty(spec.getSpecialty().name())
                         .build())
                 .toList();
     }
