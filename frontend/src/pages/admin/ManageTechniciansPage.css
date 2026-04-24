@@ -1,0 +1,245 @@
+/* ── Manage Technicians Page ──────────────────────────────────────────────── */
+.tech-mgmt-page {
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+/* Hero */
+.tech-mgmt-hero {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+.tech-mgmt-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+    display: block;
+}
+.tech-mgmt-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(61,82,160,0.82) 0%, rgba(61,82,160,0.4) 55%, transparent 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 72px;
+}
+.tech-mgmt-hero-overlay h1 {
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* Main */
+.tech-mgmt-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 36px 80px;
+}
+
+/* Toolbar */
+.tech-mgmt-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.4s ease both;
+}
+.tech-mgmt-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1.5px solid var(--clr-300);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    min-width: 260px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+.tech-mgmt-search:focus-within {
+    border-color: var(--clr-700);
+    box-shadow: 0 0 0 4px rgba(112,145,230,0.12);
+}
+.tech-mgmt-search input {
+    border: none;
+    outline: none;
+    font-size: 0.93rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-dark);
+    background: transparent;
+    width: 100%;
+}
+.tech-mgmt-search input::placeholder { color: var(--clr-500); }
+.tech-mgmt-search-icon { color: var(--clr-500); font-size: 1rem; }
+.tech-mgmt-count { font-size: 0.88rem; color: var(--text-muted); font-weight: 500; }
+
+/* Table card */
+.tech-mgmt-table-card {
+    background: var(--surface);
+    border: 1px solid var(--clr-300);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    animation: fadeUp 0.45s 0.05s ease both;
+}
+.tech-mgmt-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.tech-mgmt-table thead {
+    background: linear-gradient(135deg, var(--clr-900), var(--clr-700));
+}
+.tech-mgmt-table thead th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+}
+.tech-mgmt-table tbody tr {
+    border-bottom: 1px solid var(--clr-100);
+    transition: background var(--transition);
+}
+.tech-mgmt-table tbody tr:last-child { border-bottom: none; }
+.tech-mgmt-table tbody tr:hover { background: var(--clr-100); }
+.tech-mgmt-table td {
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    color: var(--text-body);
+    vertical-align: middle;
+}
+
+/* Technician cell */
+.tech-mgmt-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.tech-mgmt-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--clr-300);
+    flex-shrink: 0;
+}
+.tech-mgmt-initials {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--clr-900), var(--clr-700));
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Specialty select */
+.tech-mgmt-specialty-select {
+    padding: 6px 12px;
+    border: 1.5px solid var(--clr-300);
+    border-radius: var(--radius-sm);
+    font-size: 0.87rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-dark);
+    background: var(--clr-100);
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--transition);
+}
+.tech-mgmt-specialty-select:focus { border-color: var(--clr-700); }
+.tech-mgmt-specialty-select:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Delete actions */
+.tech-mgmt-btn-delete {
+    padding: 6px 12px;
+    border: 1.5px solid #fecaca;
+    border-radius: var(--radius-sm);
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+}
+.tech-mgmt-btn-delete:hover { background: #fee2e2; border-color: #f87171; }
+
+.tech-mgmt-confirm-del {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.tech-mgmt-confirm-del span { font-size: 0.83rem; color: var(--text-muted); }
+.tech-mgmt-btn-danger {
+    padding: 5px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.tech-mgmt-btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+.tech-mgmt-btn-cancel {
+    padding: 5px 12px;
+    border: 1.5px solid var(--clr-300);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.tech-mgmt-btn-cancel:hover { background: var(--clr-100); }
+
+/* Empty */
+.tech-mgmt-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* Toast */
+.tech-mgmt-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--clr-900);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    z-index: 9999;
+    animation: fadeUp 0.25s ease;
+}
+.tech-mgmt-toast.error { background: #dc2626; }
+
+/* Skeleton */
+.skeleton-row td { padding: 14px 20px; }
+.skeleton-line {
+    height: 14px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--clr-100) 25%, var(--clr-300) 50%, var(--clr-100) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
