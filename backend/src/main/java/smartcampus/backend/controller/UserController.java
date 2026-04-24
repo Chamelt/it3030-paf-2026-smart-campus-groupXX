@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import smartcampus.backend.dto.RoleUpdateRequest;
+import smartcampus.backend.dto.SpecialtyUpdateRequest;
 import smartcampus.backend.dto.UserResponseDto;
 import smartcampus.backend.entity.User;
 import smartcampus.backend.service.UserService;
@@ -58,5 +59,13 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody RoleUpdateRequest request) {
         return ResponseEntity.ok(userService.updateUserRole(id, request));
+    }
+
+    @PatchMapping("/{id}/specialty")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDto> updateTechnicianSpecialty(
+            @PathVariable UUID id,
+            @RequestBody SpecialtyUpdateRequest request) {
+        return ResponseEntity.ok(userService.updateTechnicianSpecialty(id, request));
     }
 }

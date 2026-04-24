@@ -13,7 +13,8 @@ public record UserResponseDto(
         String profilePictureUrl,
         UserRole role,
         boolean active,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String specialty
 ) {
     public static UserResponseDto from(User user) {
         return new UserResponseDto(
@@ -23,7 +24,21 @@ public record UserResponseDto(
                 user.getProfilePictureUrl(),
                 user.getRole(),
                 user.isActive(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                null
+        );
+    }
+
+    public static UserResponseDto from(User user, String specialty) {
+        return new UserResponseDto(
+                user.getUserId(),
+                user.getEmail(),
+                user.getName(),
+                user.getProfilePictureUrl(),
+                user.getRole(),
+                user.isActive(),
+                user.getCreatedAt(),
+                specialty
         );
     }
 }

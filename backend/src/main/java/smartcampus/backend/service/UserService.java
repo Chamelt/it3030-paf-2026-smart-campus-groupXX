@@ -8,9 +8,12 @@ package smartcampus.backend.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smartcampus.backend.dto.RoleUpdateRequest;
+import smartcampus.backend.dto.SpecialtyUpdateRequest;
 import smartcampus.backend.dto.UserResponseDto;
+import smartcampus.backend.entity.TechnicianSpecialty;
 import smartcampus.backend.entity.User;
 import smartcampus.backend.exception.ResourceNotFoundException;
+import smartcampus.backend.repository.TechnicianSpecialtyRepository;
 import smartcampus.backend.repository.UserRepository;
 
 import java.util.List;
@@ -21,9 +24,12 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TechnicianSpecialtyRepository technicianSpecialtyRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       TechnicianSpecialtyRepository technicianSpecialtyRepository) {
         this.userRepository = userRepository;
+        this.technicianSpecialtyRepository = technicianSpecialtyRepository;
     }
 
     public UserResponseDto getMyProfile(User currentUser) {
@@ -33,7 +39,12 @@ public class UserService {
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(UserResponseDto::from)
+                .map(u -> {
+                    String specialty = null;
+                    List<TechnicianSpecialty> specs = technicianSpecialtyRepository.findByTechnician(u);
+                    if (!specs.isEmpty()) specialty = specs.get(0).getSpecialty().name();
+                    return UserResponseDto.from(u, specialty);
+                })
                 .toList();
     }
 
@@ -42,7 +53,32 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         user.setRole(request.role());
-        return UserResponseDto.from(userRepository.save(user));
+        User saved = userRepository.save(user);
+        List<TechnicianSpecialty> specs = technicianSpecialtyRepository.findByTechnician(saved);
+        String specialty = specs.isEmpty() ? null : specs.get(0).getSpecialty().name();
+        return UserResponseDto.from(saved, specialty);
+    }
+
+    @Transactional
+    public UserResponseDto updateTechnicianSpecialty(UUID userId, SpecialtyUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        List<TechnicianSpecialty> existing = technicianSpecialtyRepository.findByTechnician(user);
+        technicianSpecialtyRepository.deleteAll(existing);
+
+        String specialtyName = null;
+        if (request.specialty() != null) {
+            TechnicianSpecialty ts = TechnicianSpecialty.builder()
+                    .technician(user)
+                    .specialty(request.specialty())
+                    .isAvailable(true)
+                    .build();
+            technicianSpecialtyRepository.save(ts);
+            specialtyName = request.specialty().name();
+        }
+
+        return UserResponseDto.from(user, specialtyName);
     }
 
     public User findById(UUID userId) {

@@ -125,7 +125,7 @@ public class TicketController {
      */
     @GetMapping("/technicians")
     public ResponseEntity<List<TechnicianDropdownResponse>> getTechniciansByCategory(
-            @RequestParam TicketCategory category) {
+            @RequestParam(required = false) TicketCategory category) {
         return ResponseEntity.ok(ticketService.getTechniciansByCategory(category));
     }
 
