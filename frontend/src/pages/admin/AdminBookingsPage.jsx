@@ -163,14 +163,15 @@ function BookingDetailModal({ booking: initialBooking, adminId, onClose, onRefre
             className="fade-in"
             onClick={e => { if (e.target === e.currentTarget) onClose() }}
             style={{
-                position: 'fixed', inset: 0, background: 'rgb(0 0 0 / 0.4)',
-                backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center',
+                position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.55)',
+                backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                display: 'flex', alignItems: 'center',
                 justifyContent: 'center', zIndex: 1000, padding: 24,
             }}
         >
             <div className="scale-in" style={{
-                background: 'var(--white)', borderRadius: 'var(--r-xl)',
-                boxShadow: 'var(--shadow-xl)', width: '100%', maxWidth: 560,
+                background: '#ffffff', borderRadius: 20,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.2)', width: '100%', maxWidth: 660,
                 maxHeight: '90vh', overflowY: 'auto',
             }}>
                 {/* Title bar with X */}
@@ -198,7 +199,7 @@ function BookingDetailModal({ booking: initialBooking, adminId, onClose, onRefre
                     )}
 
                     {/* Header row */}
-                    <div style={{ display: 'flex', gap: 14, alignItems: 'center', padding: 14, background: 'var(--gray50)', borderRadius: 'var(--r-md)' }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center', padding: 14, background: '#f8fafc', borderRadius: 14 }}>
                         <Avatar name={booking.userName} size={48} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ fontSize: 16, fontWeight: 600 }}>{booking.resourceName}</p>
@@ -217,7 +218,7 @@ function BookingDetailModal({ booking: initialBooking, adminId, onClose, onRefre
                             ['Attendees', booking.expectedAttendees ?? '—'],
                             ['Priority', booking.isPriority ? '⚡ Yes' : 'No'],
                         ].map(([k, v]) => (
-                            <div key={k} style={{ padding: '10px 14px', background: 'var(--white)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)' }}>
+                            <div key={k} style={{ padding: '10px 14px', background: 'var(--white)', border: '1px solid var(--border)', borderRadius: 14 }}>
                                 <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginBottom: 3 }}>{k}</p>
                                 <p style={{ fontSize: 14, fontWeight: 500 }}>{v}</p>
                             </div>
@@ -227,14 +228,14 @@ function BookingDetailModal({ booking: initialBooking, adminId, onClose, onRefre
                     {/* Purpose */}
                     <div>
                         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>Purpose</p>
-                        <p style={{ fontSize: 14, color: 'var(--text)', background: 'var(--gray50)', padding: '10px 14px', borderRadius: 'var(--r-md)' }}>
+                        <p style={{ fontSize: 14, color: 'var(--text)', background: 'var(--gray50)', padding: '10px 14px', borderRadius: 14 }}>
                             {booking.purpose}
                         </p>
                     </div>
 
                     {/* Priority reason */}
                     {booking.isPriority && booking.priorityReason && (
-                        <div style={{ padding: '10px 14px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 'var(--r-md)' }}>
+                        <div style={{ padding: '10px 14px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 14 }}>
                             <p style={{ fontSize: 12, color: '#92400e', fontWeight: 500, marginBottom: 3 }}>⚡ Priority reason</p>
                             <p style={{ fontSize: 13, color: '#92400e' }}>{booking.priorityReason}</p>
                         </div>
@@ -249,7 +250,7 @@ function BookingDetailModal({ booking: initialBooking, adminId, onClose, onRefre
 
                     {/* Rejection reason */}
                     {booking.rejectionReason && (
-                        <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--r-md)' }}>
+                        <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 14 }}>
                             <p style={{ fontSize: 12, color: '#dc2626', fontWeight: 500, marginBottom: 3 }}>Rejection reason</p>
                             <p style={{ fontSize: 13, color: '#dc2626' }}>{booking.rejectionReason}</p>
                         </div>
@@ -257,14 +258,14 @@ function BookingDetailModal({ booking: initialBooking, adminId, onClose, onRefre
 
                     {/* Cancellation reason */}
                     {booking.cancellationReason && (
-                        <div style={{ padding: '10px 14px', background: 'var(--gray50)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)' }}>
+                        <div style={{ padding: '10px 14px', background: 'var(--gray50)', border: '1px solid var(--border)', borderRadius: 14 }}>
                             <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500, marginBottom: 3 }}>Cancellation reason</p>
                             <p style={{ fontSize: 13, color: 'var(--text-sec)' }}>{booking.cancellationReason}</p>
                         </div>
                     )}
 
                     {err && (
-                        <p style={{ color: '#dc2626', fontSize: 13, padding: '8px 12px', background: '#fef2f2', borderRadius: 'var(--r-md)', border: '1px solid #fecaca' }}>
+                        <p style={{ color: '#dc2626', fontSize: 13, padding: '8px 12px', background: '#fef2f2', borderRadius: 14, border: '1px solid #fecaca' }}>
                             {err}
                         </p>
                     )}
@@ -272,11 +273,11 @@ function BookingDetailModal({ booking: initialBooking, adminId, onClose, onRefre
                     {/* ── Action buttons ─────────────────────────────────── */}
                     {step === 'main' && isReview && !transitioning && (
                         <div style={{ display: 'flex', gap: 12 }}>
-                            <Btn variant="success" loading={loading} style={{ flex: 1, justifyContent: 'center' }}
+                            <Btn variant="success" loading={loading} style={{ flex: 1, justifyContent: 'center', borderRadius: 14, background: '#16a34a', color: '#fff', border: 'none' }}
                                 onClick={() => act(() => bookingApi.approve(booking.bookingId, adminId))}>
                                 ✓ Approve
                             </Btn>
-                            <Btn variant="danger" style={{ flex: 1, justifyContent: 'center' }}
+                            <Btn variant="danger" style={{ flex: 1, justifyContent: 'center', borderRadius: 14 }}
                                 onClick={() => setStep('reject')}>
                                 ✕ Reject
                             </Btn>

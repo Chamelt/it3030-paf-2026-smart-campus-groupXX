@@ -129,13 +129,14 @@ export function Modal({ open, onClose, title, children, width = 560 }) {
     if (!open) return null
     return (
         <div className="fade-in" style={{
-            position: 'fixed', inset: 0, background: 'rgb(0 0 0 / 0.3)',
-            backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'center',
+            position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.55)',
+            backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center',
             justifyContent: 'center', zIndex: 1000, padding: 16,
         }}>
             <div ref={ref} className="scale-in" style={{
-                background: 'var(--surface)', borderRadius: 'var(--r-xl)',
-                boxShadow: 'var(--shadow-xl)', width: '100%', maxWidth: width,
+                background: '#ffffff', borderRadius: 'var(--r-xl)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.2)', width: '100%', maxWidth: width,
                 maxHeight: '90vh', overflowY: 'auto',
             }}>
                 {title && (
