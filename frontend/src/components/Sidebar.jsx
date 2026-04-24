@@ -1,9 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationContext'
 import './Sidebar.css'
 
 export default function Sidebar() {
   const { user, logout, isAdmin, isTechnician } = useAuth()
+  const { unreadCount } = useNotifications()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -37,6 +39,23 @@ export default function Sidebar() {
         </NavLink>
         <NavLink to="/tickets/new" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
           ➕ Report Issue
+        </NavLink>
+        <NavLink to="/notifications" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+          🔔 Notifications
+          {unreadCount > 0 && (
+            <span style={{
+              marginLeft: 'auto',
+              background: '#e53935',
+              color: 'white',
+              borderRadius: '10px',
+              padding: '1px 7px',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              lineHeight: '1.6',
+            }}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </NavLink>
 
         {(isAdmin || isTechnician) && (
@@ -76,6 +95,11 @@ export default function Sidebar() {
             {isAdmin && (
                <NavLink to="/admin/analytics" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
                  📊 Ticket Analytics
+               </NavLink>
+            )}
+            {isAdmin && (
+               <NavLink to="/admin/broadcast" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+                 📢 Broadcast
                </NavLink>
             )}
           </>

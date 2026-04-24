@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import { AuthProvider } from './context/AuthContext'
+import { NotificationProvider } from './context/NotificationContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
 import LoginPage from './pages/LoginPage'
@@ -17,6 +18,8 @@ import AdminBookingsPage from './pages/admin/AdminBookingsPage'
 import ResourcesPage from './pages/ResourcesPage'
 import MyBookingsPage from './pages/MyBookingsPage'
 import QrScannerPage from './pages/QrScannerPage'
+import NotificationsPage from './pages/NotificationsPage'
+import BroadcastPage from './pages/admin/BroadcastPage'
 
 // Module C — Maintenance & Incident Ticketing
 import MyTicketsPage          from './pages/tickets/MyTicketsPage'
@@ -32,6 +35,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <NotificationProvider>
         <Routes>
           {/* Public */}
           <Route path="/login" element={<LoginPage />} />
@@ -55,7 +59,6 @@ export default function App() {
             {/* Protected — TECHNICIAN only */}
             <Route path="/technician/tickets" element={<ProtectedRoute role="TECHNICIAN"><TechnicianTicketsPage /></ProtectedRoute>} />
 
-            {/* Placeholders — other modules will fill these in */}
             <Route path="/resources"          element={<ResourcesPage />} />
             <Route path="/bookings/my"        element={<MyBookingsPage />} />
             <Route path="/bookings/new"       element={<div style={{ padding: 40 }}>Module B – New Booking (Member 2)</div>} />
@@ -66,12 +69,17 @@ export default function App() {
             <Route path="/tickets/my"  element={<MyTicketsPage />} />
             <Route path="/tickets/new" element={<NewTicketPage />} />
             <Route path="/tickets/:id" element={<TicketDetailPage />} />
+
+            {/* Module D – Notifications */}
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/admin/broadcast" element={<ProtectedRoute role="ADMIN"><BroadcastPage /></ProtectedRoute>} />
           </Route>
 
           {/* Error pages */}
           <Route path="/403" element={<NotFoundPage code={403} message="You don't have permission to view this page." />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   )
