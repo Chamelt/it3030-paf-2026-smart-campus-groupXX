@@ -13,4 +13,5 @@ public class TechnicianDropdownResponse {
     private String name;
     private String email;
     private boolean isAvailable;
+    private String specialty;
 }
