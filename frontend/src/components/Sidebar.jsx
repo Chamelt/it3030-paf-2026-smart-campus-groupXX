@@ -35,6 +35,9 @@ export default function Sidebar() {
         <NavLink to="/tickets/my" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
           🔧 My Tickets
         </NavLink>
+        <NavLink to="/tickets/new" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+          ➕ Report Issue
+        </NavLink>
 
         {(isAdmin || isTechnician) && (
           <>
@@ -48,13 +51,31 @@ export default function Sidebar() {
                </NavLink>
             )}
             {isAdmin && (
+               <NavLink to="/admin/technicians" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+                 🔧 Manage Technicians
+               </NavLink>
+            )}
+            {isAdmin && (
                <NavLink to="/admin/resources" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
                  🏢 Manage Resources
+               </NavLink>
+            )}
+            <NavLink to="/admin/tickets" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+              🎫 All Tickets
+            </NavLink>
+            {isTechnician && (
+               <NavLink to="/technician/tickets" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+                 📋 My Tasks
                </NavLink>
             )}
             {isTechnician && (
                <NavLink to="/technician/scan" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
                  📷 Scan QR Code
+               </NavLink>
+            )}
+            {isAdmin && (
+               <NavLink to="/admin/analytics" className={({isActive}) => isActive ? "menu-link active" : "menu-link"}>
+                 📊 Ticket Analytics
                </NavLink>
             )}
           </>
