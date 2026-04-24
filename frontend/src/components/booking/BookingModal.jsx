@@ -123,7 +123,7 @@ function DrumColumn({ items, value, onChange, disabledItems = new Set() }) {
     return (
         <div style={{ position: 'relative', width: 120, flexShrink: 0, userSelect: 'none' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: ITEM_H, background: 'linear-gradient(to bottom, white 40%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: '50%', left: 8, right: 8, height: ITEM_H, transform: 'translateY(-50%)', background: 'var(--g50)', border: '2px solid var(--g300)', borderRadius: 12, zIndex: 1, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: '50%', left: 8, right: 8, height: ITEM_H, transform: 'translateY(-50%)', background: '#f1f5f9', border: '2px solid #cbd5e1', borderRadius: 999, zIndex: 1, pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: ITEM_H, background: 'linear-gradient(to top, white 40%, transparent)', zIndex: 2, pointerEvents: 'none' }} />
 
             <div
@@ -416,14 +416,14 @@ export default function BookingModal({ resource, userId, onClose, onSuccess, exi
                 onClick={e => { if (e.target === e.currentTarget) onClose() }}
                 style={{
                     position: 'fixed', inset: 0,
-                    background: 'rgb(0 0 0 / 0.45)', backdropFilter: 'blur(4px)',
+                    background: 'rgba(15, 23, 42, 0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     zIndex: 1000, padding: '2vh 2vw',
                 }}
             >
                 <div className="scale-in" style={{
-                    background: 'var(--white)', borderRadius: 20,
-                    boxShadow: '0 32px 64px rgb(0 0 0/0.18)',
+                    background: '#ffffff', borderRadius: 20,
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
                     width: 480, padding: '40px 40px 36px',
                     display: 'flex', flexDirection: 'column', alignItems: 'center',
                     gap: 20, textAlign: 'center',
@@ -518,14 +518,14 @@ export default function BookingModal({ resource, userId, onClose, onSuccess, exi
             onClick={e => { if (e.target === e.currentTarget) onClose() }}
             style={{
                 position: 'fixed', inset: 0,
-                background: 'rgb(0 0 0 / 0.45)', backdropFilter: 'blur(4px)',
+                background: 'rgba(15, 23, 42, 0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 zIndex: 1000, padding: '2vh 2vw',
             }}
         >
             <div className="scale-in" style={{
-                background: 'var(--white)', borderRadius: 20,
-                boxShadow: '0 32px 64px rgb(0 0 0/0.18)',
+                background: '#ffffff', borderRadius: 20,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
                 width: '85vw', maxWidth: 1200,
                 height: '85vh',
                 display: 'flex', flexDirection: 'column',
@@ -559,7 +559,7 @@ export default function BookingModal({ resource, userId, onClose, onSuccess, exi
                     <div style={{
                         borderRight: '1px solid var(--border-subtle)',
                         overflowY: 'auto', padding: '28px 28px',
-                        display: 'flex', flexDirection: 'column', gap: 18, background: 'var(--gray50)',
+                        display: 'flex', flexDirection: 'column', gap: 18, background: '#f8fafc',
                     }}>
                         {/* Icon */}
                         <div style={{

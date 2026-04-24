@@ -30,9 +30,11 @@ async function req(method, path, { body, userId, userRole } = {}) {
     return data
 }
 
-const get = (p, o) => req('GET', p, o)
-const post = (p, b, o) => req('POST', p, { body: b, ...o })
-const put = (p, b, o) => req('PUT', p, { body: b, ...o })
+const get   = (p, o)    => req('GET',    p, o)
+const post  = (p, b, o) => req('POST',   p, { body: b, ...o })
+const put   = (p, b, o) => req('PUT',    p, { body: b, ...o })
+const patch = (p, b, o) => req('PATCH',  p, { body: b, ...o })
+const del   = (p, o)    => req('DELETE', p, o)
 
 export const resourceApi = {
     getAll: () => get('/api/resources'),
@@ -86,4 +88,16 @@ export const bookingApi = {
 
     getPeakHours: (adminId, resourceId) =>
         get(`/api/bookings/peak-hours${resourceId ? `?resourceId=${resourceId}` : ''}`, { userId: adminId }),
+}
+
+export const notificationApi = {
+    getAll:           (userId)        => get('/api/notifications', { userId }),
+    getUnreadCount:   (userId)        => get('/api/notifications/unread-count', { userId }),
+    markAsRead:       (id, userId)    => patch(`/api/notifications/${id}/read`, undefined, { userId }),
+    markAllAsRead:    (userId)        => patch('/api/notifications/read-all', undefined, { userId }),
+    deleteOne:        (id, userId)    => del(`/api/notifications/${id}`, { userId }),
+    getPreferences:   (userId)        => get('/api/notifications/preferences', { userId }),
+    updatePreferences:(prefs, userId) => put('/api/notifications/preferences', prefs, { userId }),
+    broadcast:        (message, adminId) => post('/api/notifications/broadcast', { message }, { userId: adminId }),
+    broadcastToAdmins:(message, adminId) => post('/api/notifications/broadcast/admins', { message }, { userId: adminId }),
 }

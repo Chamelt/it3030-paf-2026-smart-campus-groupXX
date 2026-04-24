@@ -1,6 +1,7 @@
 package smartcampus.backend.controller;
 
 import smartcampus.backend.dto.*;
+import smartcampus.backend.entity.User;
 import smartcampus.backend.enums.BookingStatus;
 import smartcampus.backend.service.BookingService;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -27,16 +29,15 @@ public class BookingController {
     // ----------------------------------------------------------------
     // FEATURE 1 — POST /api/bookings
     // USER only — any authenticated user can create a booking
-    // @PreAuthorize will enforce this once JWT is integrated
     // ----------------------------------------------------------------
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BookingResponseDTO> createBooking(
             @Valid @RequestBody BookingRequestDTO request,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @AuthenticationPrincipal User user) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(bookingService.createBooking(request, userId));
+                .body(bookingService.createBooking(request, user.getUserId()));
     }
 
     // ----------------------------------------------------------------
@@ -56,21 +57,21 @@ public class BookingController {
     @GetMapping("/my")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BookingResponseDTO>> getMyBookings(
-            @RequestHeader("X-User-Id") UUID userId,
+            @AuthenticationPrincipal User user,
             @RequestParam(required = false) BookingStatus status) {
-        return ResponseEntity.ok(bookingService.getMyBookings(userId, status));
+        return ResponseEntity.ok(bookingService.getMyBookings(user.getUserId(), status));
     }
 
     // ----------------------------------------------------------------
     // FEATURE 4 — GET /api/bookings
-    // ADMIN only
+    // ADMIN only — also enforced at URL level in SecurityConfig
     // ----------------------------------------------------------------
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ResourceBookingsDTO>> getAllBookings(
-            @RequestHeader("X-User-Id") UUID adminId,
+            @AuthenticationPrincipal User user,
             @RequestParam(required = false) BookingStatus status) {
-        return ResponseEntity.ok(bookingService.getAllBookingsGrouped(adminId, status));
+        return ResponseEntity.ok(bookingService.getAllBookingsGrouped(user.getUserId(), status));
     }
 
     // ----------------------------------------------------------------
@@ -81,61 +82,61 @@ public class BookingController {
     public ResponseEntity<BookingResponseDTO> updateBooking(
             @PathVariable UUID id,
             @Valid @RequestBody BookingRequestDTO request,
-            @RequestHeader("X-User-Id") UUID userId) {
-        return ResponseEntity.ok(bookingService.updateBooking(id, request, userId));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(bookingService.updateBooking(id, request, user.getUserId()));
     }
 
     // ----------------------------------------------------------------
     // FEATURE 5 — PUT /api/bookings/{id}/review
-    // ADMIN only
+    // ADMIN only — also enforced at URL level in SecurityConfig
     // ----------------------------------------------------------------
     @PutMapping("/{id}/review")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookingResponseDTO> markInReview(
             @PathVariable UUID id,
-            @RequestHeader("X-User-Id") UUID adminId) {
-        return ResponseEntity.ok(bookingService.markInReview(id, adminId));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(bookingService.markInReview(id, user.getUserId()));
     }
 
     // ----------------------------------------------------------------
     // FEATURE 6 — PUT /api/bookings/{id}/reject
-    // ADMIN only
+    // ADMIN only — also enforced at URL level in SecurityConfig
     // ----------------------------------------------------------------
     @PutMapping("/{id}/reject")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookingResponseDTO> rejectBooking(
             @PathVariable UUID id,
             @Valid @RequestBody RejectRequestDTO body,
-            @RequestHeader("X-User-Id") UUID adminId) {
-        return ResponseEntity.ok(bookingService.rejectBooking(id, body.getReason(), adminId));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(bookingService.rejectBooking(id, body.getReason(), user.getUserId()));
     }
 
     // ----------------------------------------------------------------
     // FEATURE 7 — PUT /api/bookings/{id}/approve
-    // ADMIN only
+    // ADMIN only — also enforced at URL level in SecurityConfig
     // ----------------------------------------------------------------
     @PutMapping("/{id}/approve")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookingResponseDTO> approveBooking(
             @PathVariable UUID id,
-            @RequestHeader("X-User-Id") UUID adminId) {
-        return ResponseEntity.ok(bookingService.approveBooking(id, adminId));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(bookingService.approveBooking(id, user.getUserId()));
     }
 
     // ----------------------------------------------------------------
     // FEATURE 8 — PUT /api/bookings/{id}/cancel
-    // USER (own) or ADMIN (any non-terminal)
+    // USER (own booking) or ADMIN (any non-terminal booking)
+    // Role is derived from the JWT principal, not a client header.
     // ----------------------------------------------------------------
     @PutMapping("/{id}/cancel")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BookingResponseDTO> cancelBooking(
             @PathVariable UUID id,
             @RequestBody(required = false) CancelRequestDTO body,
-            @RequestHeader("X-User-Id") UUID userId,
-            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+            @AuthenticationPrincipal User user) {
+        boolean isAdmin = user.getRole().name().equals("ADMIN");
         String reason = (body != null) ? body.getReason() : null;
-        return ResponseEntity.ok(bookingService.cancelBooking(id, reason, userId, isAdmin));
+        return ResponseEntity.ok(bookingService.cancelBooking(id, reason, user.getUserId(), isAdmin));
     }
 
     // ----------------------------------------------------------------
@@ -168,24 +169,23 @@ public class BookingController {
 
     // ----------------------------------------------------------------
     // FEATURE 11 — GET /api/bookings/stats
-    // ADMIN only
+    // ADMIN only — also enforced at URL level in SecurityConfig
     // ----------------------------------------------------------------
     @GetMapping("/stats")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<StatsResponseDTO> getStats(
-            @RequestHeader("X-User-Id") UUID adminId) {
-        return ResponseEntity.ok(bookingService.getStats(adminId));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StatsResponseDTO> getStats(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(bookingService.getStats(user.getUserId()));
     }
 
     // ----------------------------------------------------------------
     // FEATURE 12 — GET /api/bookings/peak-hours
-    // ADMIN only
+    // ADMIN only — also enforced at URL level in SecurityConfig
     // ----------------------------------------------------------------
     @GetMapping("/peak-hours")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PeakHourDTO>> getPeakHours(
-            @RequestHeader("X-User-Id") UUID adminId,
+            @AuthenticationPrincipal User user,
             @RequestParam(required = false) UUID resourceId) {
-        return ResponseEntity.ok(bookingService.getPeakHours(adminId, resourceId));
+        return ResponseEntity.ok(bookingService.getPeakHours(user.getUserId(), resourceId));
     }
 }

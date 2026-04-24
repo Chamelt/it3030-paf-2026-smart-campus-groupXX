@@ -9,20 +9,25 @@ export default function ResourceCard({ resource, onBook }) {
             onClick={active ? () => onBook(resource) : undefined}
             className={`resource-card scale-in${active ? ' active' : ''}`}
         >
-            {resource.imageUrl ? (
-                <img
-                    src={resource.imageUrl}
-                    alt={resource.name}
-                    className="resource-card-img"
-                />
-            ) : (
-                <div className={`resource-card-placeholder ${active ? 'active-bg' : 'inactive-bg'}`}>
-                    {getIcon(resource.type)}
-                    {!active && (
-                        <span className="resource-card-status-pill">{resource.status}</span>
-                    )}
-                </div>
-            )}
+            <div style={{ position: 'relative' }}>
+                {resource.imageUrl ? (
+                    <img
+                        src={resource.imageUrl}
+                        alt={resource.name}
+                        className="resource-card-img"
+                    />
+                ) : (
+                    <div className={`resource-card-placeholder ${active ? 'active-bg' : 'inactive-bg'}`}>
+                        {getIcon(resource.type)}
+                    </div>
+                )}
+
+                {!active && (
+                    <span className="resource-card-status-pill">
+                        {resource.status.replace(/_/g, ' ')}
+                    </span>
+                )}
+            </div>
 
             <div className="resource-card-body">
                 <div className="resource-card-title-row">
